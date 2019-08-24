@@ -25,3 +25,7 @@ from pip.__main__ import _main
 
 def install(package):
     _main(['install', package])
+
+
+def uninstall(package):
+    _main(['uninstall', package, '-y'])
