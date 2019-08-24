@@ -6,7 +6,7 @@ from qaviton_package_manager.create_setup import create_setup
 
 def test_pip_install(username="", password=""):
     credentials = "" if len(username) + len(password) == 0 else f"{urlencode(username)}:{urlencode(password)}@"
-    package = f"git+https://{credentials}github.com/qaviton/qaviton_package_manager.git"
+    package = f"git+https://{credentials}github.com/qaviton/qaviton_package_manager.git@master"
     pip_wrapper.install(package)
     pip_wrapper.uninstall('qaviton_package_manager')
 
@@ -17,3 +17,4 @@ def test_pip_install(username="", password=""):
 #     package = f"git+https://{credentials}github.com/qaviton/qaviton_package_manager.git"
 #     pip_wrapper.install(package)
 #     pip_wrapper.uninstall('qaviton_package_manager')
+test_pip_install()

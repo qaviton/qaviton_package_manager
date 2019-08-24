@@ -27,8 +27,7 @@
     twine upload dist/*
 """
 
-
-from sys import version_info
+from sys import version_info as v
 from qaviton_package_manager import __author__, __version__, __author_email__, __description__, __url__, __license__
 from setuptools import setup, find_packages
 
@@ -53,7 +52,7 @@ setup(
     packages=[pkg for pkg in find_packages() if pkg.startswith("qaviton_package_manager")],
     license=__license__,
     classifiers=[
-        f"Programming Language :: Python :: {'.'.join(version_info()[:2])}",
+        f"Programming Language :: Python :: {v[0]}.{v[1]}",
         "Operating System :: OS Independent",
     ],
     install_requires=requirements

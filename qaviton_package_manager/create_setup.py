@@ -141,7 +141,7 @@ def handle_package_init(
 
 def create_setup_file(package_name, readme, requirements):
     content = b''.join([
-        b'from sys import version_info'
+        b'from sys import version_info as v'
         b'from ' + bytes(package_name, 'utf-8') + b' import __author__, __version__, __author_email__, __description__, __url__, __license__\n',
         b'from setuptools import setup, find_packages\n',
         b'\n',
@@ -166,7 +166,7 @@ def create_setup_file(package_name, readme, requirements):
         b'    packages=[pkg for pkg in find_packages() if pkg.startswith("' + bytes(package_name, 'utf-8') + b'")],\n',
         b'    license=__license__,\n',
         b'    classifiers=[\n',
-        b'        f"Programming Language :: Python :: {\'.\'.join(version_info()[:2])}",\n',
+        b'        f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
         b'        "Operating System :: OS Independent",\n',
         b'    ],\n',
         b'    install_requires=requirements\n',
