@@ -17,15 +17,5 @@ __version__ = '0.0.1'
 __author_email__ = 'info@qaviton.com'
 __description__ = 'a package manager for projects with private repositories'
 __url__ = 'https://github.com/qaviton/qaviton_package_manager'
-__license__ = 'Apache 2.0'
+__license__ = 'apache-2.0'
 
-
-from pip.__main__ import _main
-
-
-def install(package):
-    _main(['install', package])
-
-
-def uninstall(package):
-    _main(['uninstall', package, '-y'])

@@ -1,0 +1,3 @@
+LICENSE = 'LICENSE'
+README = 'README.md'
+REQUIREMENTS = 'requirements.txt'
