@@ -12,16 +12,13 @@
 # language governing permissions and limitations under the License.
 
 
-LICENSE = 'LICENSE'
-README = 'README.md'
-REQUIREMENTS = 'requirements.txt'
+from qaviton_package_manager.utils.pip_wrapper import install as pip_install
+from qaviton_package_manager.manager_methods import ManagerOperation
 
-# https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support
-supported_protocols = (
-    'git://',
-    'git+http://',
-    'git+https://',
-    'git+ssh://',
-    'git+git://',
-    'git+file:///',
-)
+
+class Update(ManagerOperation):
+    def run(self):
+        if len(self.packages) == 0 or self.packages[0] is None:
+            self.get_packages_from_requirements()
+
+        pip_install(*self.configure_packages(), '--upgrade')

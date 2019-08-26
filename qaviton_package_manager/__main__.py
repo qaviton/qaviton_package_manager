@@ -1,30 +1,19 @@
-from sys import argv
-from .create_setup import create_setup
+# Copyright 2019 qaviton.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+# https://github.com/qaviton/qaviton_package_manager/blob/master/LICENSE
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
 
 
-class API:
-    create = 'create'
-    name = 'name'
-
-
-def main(**kwargs):
-    if API.create in kwargs:
-        if API.name in kwargs:
-            package_name = kwargs[API.name]
-        else:
-            package_name = None
-        create_setup(package_name)
-
-    if '--'+API.create in argv:
-        if '--'+API.name in argv:
-            try:
-                package_name = argv[argv.index('--'+API.name)+1]
-            except:
-                raise ValueError("missing name value")
-        else:
-            package_name = None
-        create_setup(package_name)
+from qaviton_package_manager.manager_api import Manager
 
 
 if __name__ == '__main__':
-    main()
+    Manager().run()

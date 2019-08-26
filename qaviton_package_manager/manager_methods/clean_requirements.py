@@ -12,16 +12,13 @@
 # language governing permissions and limitations under the License.
 
 
-LICENSE = 'LICENSE'
-README = 'README.md'
-REQUIREMENTS = 'requirements.txt'
+from qaviton_package_manager.utils.pip_wrapper import uninstall as pip_remove
+from qaviton_package_manager.manager_methods import Operation
 
-# https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support
-supported_protocols = (
-    'git://',
-    'git+http://',
-    'git+https://',
-    'git+ssh://',
-    'git+git://',
-    'git+file:///',
-)
+
+class Clean(Operation):
+    def run(self):
+        if len(self.packages) == 0 or self.packages[0] is None:
+            self.get_packages_from_requirements()
+
+        pip_remove(*self.configure_packages())
