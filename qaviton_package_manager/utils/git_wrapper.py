@@ -87,3 +87,7 @@ class RepoData:
         if not self.username: raise usernameError
         if not self.useremail: raise useremailError
         if not self.url: raise urlError
+
+
+git = Git()
+__all__ = ['git', 'RepoData']

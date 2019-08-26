@@ -4,9 +4,12 @@ from sys import executable as python
 
 class PIP:
     """wrapper around pip"""
-    def __call__(pip, command, *args):
-        return run(f'{python} -m pip {command} '+' '.join(args))
-
-    def install(pip, package, *args): return pip('install', package, *args)
-    def uninstall(pip, package, *args): return pip('uninstall', package, *args, '-y')
+    def __init__(pip): pip.version = pip('--version')
+    def __call__(pip, *args): return run(f'{python} -m pip {" ".join(args)}')
+    def install(pip, *args): return pip('install', *args)
+    def uninstall(pip, *args): return pip('uninstall', *args, '-y')
     def freeze(pip, filename, *args): return pip('freeze', '>', filename, *args)
+
+
+pip = PIP()
+__all__ = ['pip']

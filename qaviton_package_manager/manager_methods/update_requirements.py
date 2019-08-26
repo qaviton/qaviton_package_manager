@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from qaviton_package_manager.utils.pip_wrapper import PIP
+from qaviton_package_manager.utils.pip_wrapper import pip
 from qaviton_package_manager.manager_methods import ManagerOperation
 
 
@@ -21,4 +21,4 @@ class Update(ManagerOperation):
         if len(self.packages) == 0 or self.packages[0] is None:
             self.get_packages_from_requirements()
 
-        PIP().install(*self.configure_packages(), '--upgrade')
+        pip.install(*self.configure_packages(), '--upgrade')
