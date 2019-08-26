@@ -13,10 +13,10 @@
 
 
 import os
-from qaviton_package_manager.utils.functions import get_requirements
-from urllib.parse import quote_plus as urlencode
 from abc import ABCMeta, abstractmethod
+from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.conf import supported_protocols
+from qaviton_package_manager.utils.functions import get_requirements
 
 
 def get_packages(requirements_path):

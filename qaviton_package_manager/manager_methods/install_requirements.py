@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from qaviton_package_manager.utils.pip_wrapper import install as pip_install
+from qaviton_package_manager.utils.pip_wrapper import PIP
 from qaviton_package_manager.manager_methods import ManagerOperation
 
 
@@ -22,7 +22,7 @@ class Install(ManagerOperation):
         if install_requirements:
             self.get_packages_from_requirements()
 
-        pip_install(*self.configure_packages())
+        PIP().install(*self.configure_packages())
 
         if not install_requirements and self.packages:
             with open(self.requirements_path) as f:

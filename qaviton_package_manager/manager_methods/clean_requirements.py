@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from qaviton_package_manager.utils.pip_wrapper import uninstall as pip_remove
+from qaviton_package_manager.utils.pip_wrapper import PIP
 from qaviton_package_manager.manager_methods import Operation
 
 
@@ -21,4 +21,4 @@ class Clean(Operation):
         if len(self.packages) == 0 or self.packages[0] is None:
             self.get_packages_from_requirements()
 
-        pip_remove(*self.configure_packages())
+        PIP().uninstall(*self.configure_packages())

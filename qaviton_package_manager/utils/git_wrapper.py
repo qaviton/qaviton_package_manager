@@ -31,7 +31,7 @@ class Git:
     def create_remote(git): git(f'push -u origin {git.get_current_branch()}'); return git
     def get_config(git)->[bytes]: return git('config --list').splitlines()
     def get_current_branch(git)->bytes: return git('symbolic-ref --short HEAD').strip()
-    def get_remote_branches(git)->[bytes]: return [branch.strip() for branch in git('branch -r').splitlines() if b' -> ' not in branch]
+    def get_remote_branches(git)->[bytes]: return [branch.strip().split(b' -> ', 1)[0] for branch in git('branch -r').splitlines()]
     def get_local_branches(git)->[bytes]:
         branches = git('branch').splitlines()
         for i, branch in enumerate(branches):

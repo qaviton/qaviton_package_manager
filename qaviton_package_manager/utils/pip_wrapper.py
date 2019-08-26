@@ -1,16 +1,12 @@
-from pip.__main__ import _main
+from qaviton_package_manager.utils.system import run
+from sys import executable as python
 
 
-def install(package, *args):
+class PIP:
     """wrapper around pip"""
-    _main(['install', package, *args])
+    def __call__(pip, command, *args):
+        return run(f'{python} -m pip {command} '+' '.join(args))
 
-
-def uninstall(package, *args):
-    """wrapper around pip"""
-    _main(['uninstall', package, *args, '-y'])
-
-
-def freeze(filename, *args):
-    """wrapper around pip"""
-    _main(['freeze', '>', filename, *args])
+    def install(pip, package, *args): return pip('install', package, *args)
+    def uninstall(pip, package, *args): return pip('uninstall', package, *args, '-y')
+    def freeze(pip, filename, *args): return pip('freeze', '>', filename, *args)

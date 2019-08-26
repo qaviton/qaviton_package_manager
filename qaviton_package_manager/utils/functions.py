@@ -1,6 +1,6 @@
 import os
 from qaviton_package_manager.conf import REQUIREMENTS
-from qaviton_package_manager.utils.pip_wrapper import freeze
+from qaviton_package_manager.utils.pip_wrapper import PIP
 
 
 def get_requirements(root):
@@ -12,5 +12,5 @@ def get_requirements(root):
         if not name: name = REQUIREMENTS
         requirements = root + os.sep + name
         if not os.path.exists(requirements):
-            freeze(requirements)
+            PIP().freeze(requirements)
     return requirements
