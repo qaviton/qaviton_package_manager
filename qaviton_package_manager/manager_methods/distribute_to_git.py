@@ -10,14 +10,17 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-import os
-import shutil
+
+
+# import os
+# import shutil
 import datetime
 from qaviton_package_manager.utils.functions import create_distibution_packages
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.functions import try_to
 from qaviton_package_manager.manager_methods import Prep
 from qaviton_package_manager.utils.functions import escape
+# from urllib.parse import quote_plus as urlencode
 
 
 class Build(Prep):
@@ -41,45 +44,23 @@ class Build(Prep):
             try_to(git.stash)
             git.pull()
             git(f'rebase {current_branch}')
-        git.tag(f'version {version}', msg)
 
-        dist = self.root + os.sep + 'dist'
-        build = self.root + os.sep + 'build'
-        create_distibution_packages()
-        git.add(dist + os.sep)
-        git.add(build + os.sep)
-        git.commit('adding distribution build')
+        git.tag(f'{branch}', msg)
         git.push(git.url, to_branch)
 
         git.switch(branch)
         git.create_remote()
-
-        dist_path = git.root+os.sep+'dist'
-        self.add_dist(dist, dist_path)
-
-        git.tag(f'version {version}', msg)
         git.push(git.url, branch)
-        req = f'git+{git.url}@{branch}#egg=dist'
+        req = f'git+{git.url}@{branch}'
+        latest = f'git+{git.url}@{to_branch}'
         print('you can now install this package:')
-        print('1) go to another project with git (make sure you have permissions)')
-        print('2) python -m venv venv (recommended)')
-        print('3) pip install qaviton_package_manager')
-        print(f'4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(req)}"')
-        git.checkout(current_branch)
-
-    def add_dist(self, dist, dist_path):
-        if self.root != self.git.root:
-            if os.path.exists(dist_path):
-                shutil.rmtree(dist_path)
-            shutil.move(dist, dist_path)
-        root_files = os.listdir(self.git.root)
-        for name in root_files:
-            path = self.git.root + os.sep + name
-            if os.path.isdir(name):
-                if not (name.startswith('.') or name == 'dist'):
-                    shutil.rmtree(path)
-        self.git.add(dist_path + os.sep)
-        self.git.commit('added distribution')
+        print('  1) go to another project with git (make sure you have permissions)')
+        print('  2) python -m venv venv (recommended)')
+        print('  3) pip install qaviton_package_manager')
+        print(f'  4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(req)}"')
+        print("or if you want the latest version:")
+        print(f'  4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(latest)}"')
+        try_to(git, f'checkout -f {current_branch}')
 
     def update_version(self, version):
         version = self.versioning(version)

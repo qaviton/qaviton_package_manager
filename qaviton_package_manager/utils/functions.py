@@ -57,12 +57,16 @@ def try_to(f, *args, **kwargs):
         return e
 
 
-def create_distibution_packages():
+def clean_distibution():
     shutil.rmtree('build')
     shutil.rmtree('dist')
+
+def create_distibution_packages():
+    clean_distibution()
     python('setup.py sdist bdist_wheel --universal')
 
 
 def upload_to_pypi(username, password):
     create_distibution_packages()
     python(f'-m twine upload -u "{username}" -p "{password}" dist/*')
+    clean_distibution()

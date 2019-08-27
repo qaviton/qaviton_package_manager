@@ -159,7 +159,7 @@ class Git(GitBase):
     def switch(git, branch): git(f'switch -c "{escape(branch)}"'); return git
     def get_url(git)->bytes: return git('config --get remote.origin.url')
     def create_branch(git, name): git(f'checkout -b "{escape(name)}"'); return git
-    def checkout(git, to_branch): git(f'checkout  "{escape(to_branch)}"'); return git
+    def checkout(git, to_branch): git(f'checkout "{escape(to_branch)}"'); return git
     def create_remote(git, branch=None): git(f'push -u origin "{escape(git.get_current_branch() if branch is None else branch)}"'); return git
     def get_config(git)->[bytes]: return git('config --list').splitlines()
     def get_current_branch(git)->bytes: return git('symbolic-ref --short HEAD').strip()
