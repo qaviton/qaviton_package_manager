@@ -15,7 +15,7 @@ import datetime
 
 
 class Build:
-    def __init__(self, package_name, to_branch='build', version=None):
+    def __init__(self, username, password, package_name, to_branch='build', version=None):
         git.stash()
         git.fetch()
         local_branches = git.get_local_branches()
@@ -38,3 +38,5 @@ class Build:
     @staticmethod
     def versiondate(version: str):
         return datetime.datetime(*[int(t) for t in version.split('.')])
+
+git.stash().fetch().create_branch('test').create_remote().push(f'{git.url()}')

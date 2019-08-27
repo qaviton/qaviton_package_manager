@@ -18,7 +18,7 @@ from qaviton_package_manager.manager_methods.install_requirements import Install
 from qaviton_package_manager.manager_methods.update_requirements import Update
 from qaviton_package_manager.manager_methods.remove_requirements import Remove
 from qaviton_package_manager.manager_methods.clean_requirements import Clean
-# from qaviton_package_manager.manager_methods.save_version import Build
+from qaviton_package_manager.manager_methods.save_version import Build
 
 
 class Manager:
@@ -70,9 +70,9 @@ class Manager:
         for key in self._ord:
             getattr(self, key)(self.kwargs[key])
 
-    def create(self, package_name=None):         Create(package_name)
-    def install(self, *packages):                Install(self.username, self.password, *packages)
-    def update(self, *packages):                 Update(self.username, self.password, *packages)
-    def clean(self, *packages):                  Clean(*packages)
-    def remove(self, *packages):                 Remove(*packages)
-    def build(self, package_name, version=None): Build(package_name, version)
+    def create(self, package_name=None): Create(package_name)
+    def install(self, *packages): Install(self.username, self.password, *packages)
+    def update(self, *packages): Update(self.username, self.password, *packages)
+    def clean(self, *packages): Clean(*packages)
+    def remove(self, *packages): Remove(*packages)
+    def build(self, package_name, to_branch='build', version=None): Build(self.username, self.password, package_name, to_branch=to_branch, version=version)
