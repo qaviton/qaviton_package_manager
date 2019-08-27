@@ -42,26 +42,21 @@ class Build(Prep):
             git.pull()
             git(f'rebase {current_branch}')
         git.tag(f'version {version}', msg)
+
+        dist = self.root + os.sep + 'dist'
+        build = self.root + os.sep + 'build'
+        create_distibution_packages()
+        git.add(dist + os.sep)
+        git.add(build + os.sep)
+        git.commit('adding distribution build')
         git.push(git.url, to_branch)
 
         git.switch(branch)
         git.create_remote()
 
-        create_distibution_packages()
         dist_path = git.root+os.sep+'dist'
-        if self.root != git.root:
-            dist = self.root+os.sep+'dist'
-            if os.path.exists(dist_path):
-                shutil.rmtree(dist_path)
-            shutil.move(dist, dist_path)
-        root_files = os.listdir(git.root)
-        for name in root_files:
-            path = git.root+os.sep+name
-            if os.path.isdir(name):
-                if not (name.startswith('.') or name == 'dist'):
-                    shutil.rmtree(path)
-        git.add(dist_path+os.sep)
-        git.commit(msg)
+        self.add_dist(dist, dist_path)
+
         git.tag(f'version {version}', msg)
         git.push(git.url, branch)
         req = f'git+{git.url}@{branch}#egg=dist'
@@ -71,6 +66,20 @@ class Build(Prep):
         print('3) pip install qaviton_package_manager')
         print(f'4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(req)}"')
         git.checkout(current_branch)
+
+    def add_dist(self, dist, dist_path):
+        if self.root != self.git.root:
+            if os.path.exists(dist_path):
+                shutil.rmtree(dist_path)
+            shutil.move(dist, dist_path)
+        root_files = os.listdir(self.git.root)
+        for name in root_files:
+            path = self.git.root + os.sep + name
+            if os.path.isdir(name):
+                if not (name.startswith('.') or name == 'dist'):
+                    shutil.rmtree(path)
+        self.git.add(dist_path + os.sep)
+        self.git.commit('added distribution')
 
     def update_version(self, version):
         version = self.versioning(version)

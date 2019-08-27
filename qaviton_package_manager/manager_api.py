@@ -19,7 +19,7 @@ from qaviton_package_manager.manager_methods.install_requirements import Install
 from qaviton_package_manager.manager_methods.update_requirements import Update
 from qaviton_package_manager.manager_methods.remove_requirements import Remove
 from qaviton_package_manager.manager_methods.clean_requirements import Clean
-from qaviton_package_manager.manager_methods.save_version import Build
+from qaviton_package_manager.manager_methods.distribute_to_git import Build
 from qaviton_package_manager.utils.system import run
 
 
@@ -65,3 +65,5 @@ class Manager:
     def remove(self, *packages): Remove(*packages)
     def test(self, *test_commands): run(*test_commands)
     def build(self, package_name, to_branch='build', version=None): Build(self.git, package_name, to_branch=to_branch, version=version)
+    def build_pypi(self, package_name, to_branch='build', version=None):
+        Build(self.git, package_name, to_branch=to_branch, version=version)

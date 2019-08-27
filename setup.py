@@ -12,21 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-""" updating pip version:
-    ---------------------
-1) increase qaviton.version.__version__
-2) make sure these are installed:
-    pip install wheel
-    python setup.py bdist_wheel --universal
-    pip install twine
-3) run these:
-    python setup.py sdist
-    python setup.py bdist_wheel
-    twine upload dist/*
-"""
-
 from sys import version_info as v
 from qaviton_package_manager import __author__, __version__, __author_email__, __description__, __url__, __license__
 from setuptools import setup, find_packages

@@ -60,8 +60,7 @@ def try_to(f, *args, **kwargs):
 def create_distibution_packages():
     shutil.rmtree('build')
     shutil.rmtree('dist')
-    python('setup.py bdist_wheel --universal')
-    python('setup.py sdist bdist_wheel')
+    python('setup.py sdist bdist_wheel --universal')
 
 
 def upload_to_pypi(username, password):
