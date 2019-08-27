@@ -10,12 +10,12 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-from qaviton_package_manager.utils.git_wrapper import git
+from qaviton_package_manager.utils.git_wrapper import Git
 import datetime
 
 
 class Build:
-    def __init__(self, username, password, package_name, to_branch='build', version=None):
+    def __init__(self, git: Git, package_name, to_branch='build', version=None):
         git.stash()
         git.fetch()
         local_branches = git.get_local_branches()

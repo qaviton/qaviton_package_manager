@@ -17,6 +17,7 @@ from abc import ABCMeta, abstractmethod
 from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.conf import supported_protocols
 from qaviton_package_manager.utils.functions import get_requirements
+from qaviton_package_manager.utils.git_wrapper import Git
 
 
 def get_packages(requirements_path):
@@ -26,9 +27,8 @@ def get_packages(requirements_path):
 
 
 class ManagerOperation(metaclass=ABCMeta):
-    def __init__(self, username, password, *packages):
-        self.username = username
-        self.password = password
+    def __init__(self, git: Git, *packages):
+        self.git = git
         self.packages = packages
         self.requirements_path = get_requirements(os.getcwd())
         self.run()
@@ -40,7 +40,7 @@ class ManagerOperation(metaclass=ABCMeta):
                 if pkg.startswith(supported_protocol):
                     configured_packages[i] = \
                         supported_protocol + \
-                        f'{urlencode(self.username)}:{urlencode(self.password)}@' + \
+                        f'{urlencode(self.git.username)}:{urlencode(self.git.password)}@' + \
                         pkg[len(supported_protocol):]
         return configured_packages
 

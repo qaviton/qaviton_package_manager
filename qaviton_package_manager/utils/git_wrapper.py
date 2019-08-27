@@ -78,6 +78,8 @@ class Git(GitBase):
         git.url = url
         git.username = username
         git.password = password
+        if username: git.config_username()
+        if password: git.config_password()
         # https://git-scm.com/book/tr/v2/Git-on-the-Server-The-Protocols
         # we only support https authentication at the moment
         remote_protocols = (
@@ -94,6 +96,10 @@ class Git(GitBase):
             if protocol():
                 break
 
+    def __del__(git):
+        if git.password:
+            git.unset_password()
+
     def _https_handler(git):
         protocol = 'https://'
         if git.url.startswith(protocol):
@@ -106,6 +112,9 @@ class Git(GitBase):
             git.url = f'{protocol}{credentials}{git.url[len(protocol):]}'
             return True
 
+    def config_username(git): git(f'config user.name "{git.username}"'); return git
+    def config_password(git): git(f'config user.password "{git.password}"'); return git
+    def unset_password(git): git(f'config --unset user.password "{git.password}"'); return git
     def stash(git): git('stash'); return git
     def fetch(git): git('fetch', git.url); return git
     def pull(git): git('pull', git.url); return git
@@ -114,7 +123,7 @@ class Git(GitBase):
     def switch(git, branch): git(f'switch -c {branch}'); return git
     # def url(git)->bytes: return git('config --get remote.origin.url')
     def create_branch(git, name): git(f'checkout -b {name}'); return git
-    def create_remote(git): git(f'push -u origin {git.get_current_branch()}'); return git
+    def create_remote(git, branch=None): git(f'push -u {git.url} {git.get_current_branch() if branch is None else branch}'); return git
     def get_config(git)->[bytes]: return git('config --list').splitlines()
     def get_current_branch(git)->bytes: return git('symbolic-ref --short HEAD').strip()
     def get_remote_branches(git)->[bytes]: return [branch.strip().split(b' -> ', 1)[0] for branch in git('branch -r').splitlines()]
