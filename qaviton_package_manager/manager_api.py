@@ -25,8 +25,14 @@ from qaviton_package_manager.utils.system import run
 
 
 class Manager:
-    def __init__(self, url=None, username=None, password=None, **kwargs):
-        self.kwargs = {'url': url, 'username': username, 'password': password}
+    def __init__(self, url=None, username=None, password=None, pypi_user=None, pypi_pass=None, **kwargs):
+        self.kwargs = {
+            'url': url,
+            'username': username,
+            'password': password,
+            'pypi_user': pypi_user,
+            'pypi_pass': pypi_pass,
+        }
         self._set_kwargs(kwargs)
         self._ord = list(kwargs.keys())
         self._get_external_args()
@@ -59,11 +65,11 @@ class Manager:
         for key in self._ord:
             getattr(self, key)(*self.kwargs[key])
 
-    def create(self, package_name=None): Create(package_name)
-    def install(self, *packages): Install(self.git, *packages)
-    def update(self, *packages): Update(self.git, *packages)
-    def clean(self, *packages): Clean(*packages)
-    def remove(self, *packages): Remove(*packages)
-    def test(self, *test_commands): run(*test_commands)
-    def build(self, package_name, to_branch='build', version=None): Build(self.git, package_name, to_branch=to_branch, version=version)
-    def upload(self, pypi_user, pypi_pass): Upload(pypi_user, pypi_pass)
+    def create(self, package_name=None): Create(package_name); return self
+    def install(self, *packages): Install(self.git, *packages); return self
+    def update(self, *packages): Update(self.git, *packages); return self
+    def clean(self, *packages): Clean(*packages); return self
+    def remove(self, *packages): Remove(*packages); return self
+    def test(self, *test_commands): run(*test_commands); return self
+    def build(self, to_branch='build', version=None): Build(self.git, to_branch=to_branch, version=version); return self
+    def upload(self): Upload(self.kwargs['pypi_user'], self.kwargs['pypi_pass']); return self

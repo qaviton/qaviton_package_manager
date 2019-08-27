@@ -2,19 +2,13 @@ import subprocess
 from sys import executable
 
 
-class CompletedProcess(subprocess.CompletedProcess):
-    returncode: int
-    stdout: bytes
-    stderr: bytes
-
-
-def run(*args) -> CompletedProcess:
+def run(*args) -> bytes:
     command = ' '.join(args)
     r = subprocess.run(command, shell=True, stdout=subprocess.PIPE, check=True)
     if r.stderr: raise OSError(
         f'{command} failed\n'
         f'{r.stderr}, Exit Code: {r.returncode}\n')
-    return r
+    return r.stdout
 
 
 def python(*args):

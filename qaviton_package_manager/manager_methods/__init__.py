@@ -19,6 +19,7 @@ from qaviton_package_manager.conf import supported_protocols
 from qaviton_package_manager.utils.functions import get_requirements
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.logger import log
+from qaviton_package_manager.utils.functions import get_package_name
 
 
 def get_packages(requirements_path):
@@ -76,7 +77,7 @@ class Prep:
         self.git = git
 
         self.setup_path = self.root+os.sep+'setup.py'
-        self.package_name = package_name
+        self.package_name = get_package_name()
 
         self.pkg_path = self.root+os.sep+package_name
         self.pkg_init = self.pkg_path + os.sep + '__init__.py'

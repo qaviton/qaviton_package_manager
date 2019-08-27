@@ -53,7 +53,7 @@ class Create(Prep):
         log.info("creating git packaging system")
         Prep.__init__(self, git, package_name)
         self.username = input("enter your git username:")
-        self.password = input("enter your git password:")
+        self.pypi_user = input("enter your pypi username:")
         self.repo = RepoData()
 
         if os.path.exists(self.setup_path):
@@ -158,35 +158,31 @@ class Create(Prep):
 
     def create_setup_file(self, readme, requirements):
         content = b''.join([
-            b'from sys import version_info as v'
-            b'from ' + bytes(self.package_name, 'utf-8') + b' import __author__, __version__, __author_email__, __description__, __url__, __license__\n',
-            b'from setuptools import setup, find_packages\n',
+            b'package_name = "' + bytes(self.package_name, 'utf-8') + b'"\n',
             b'\n',
             b'\n',
-            b'with open("' + bytes(requirements.rsplit(os.sep, 1), 'utf-8') + b'") as f:\n',
-            b'    requirements = f.read().splitlines()\n',
-            b'\n',
-            b'\n',
-            b'with open("' + bytes(readme.rsplit(os.sep, 1), 'utf-8') + b'") as f:\n',
-            b'    long_description = f.read()\n',
-            b'\n',
-            b'\n',
-            b'setup(\n',
-            b'    name="' + bytes(self.package_name, 'utf-8') + b'",\n',
-            b'    version=__version__,\n',
-            b'    author=__author__,\n',
-            b'    author_email=__author_email__,\n',
-            b'    description=__description__,\n',
-            b'    long_description=long_description,\n',
-            b'    long_description_content_type="text/markdown",\n',
-            b'    url=__url__,\n',
-            b'    packages=[pkg for pkg in find_packages() if pkg.startswith("' + bytes(self.package_name, 'utf-8') + b'")],\n',
-            b'    license=__license__,\n',
-            b'    classifiers=[\n',
-            b'        f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
-            b'    ],\n',
-            b'    install_requires=requirements\n',
-            b')\n',
+            b'if __name__ == "__main__":\n',
+            b'    from sys import version_info as v\n',
+            b'    from ' + bytes(self.package_name, 'utf-8') + b' import __author__, __version__, __author_email__, __description__, __url__, __license__\n',
+            b'    from setuptools import setup, find_packages\n',
+            b'    with open("' + bytes(requirements.rsplit(os.sep, 1), 'utf-8') + b'") as f: requirements = f.read().splitlines()\n',
+            b'    with open("' + bytes(readme.rsplit(os.sep, 1), 'utf-8') + b'") as f: long_description = f.read()\n',
+            b'    setup(\n',
+            b'        name=package_name,\n',
+            b'        version=__version__,\n',
+            b'        author=__author__,\n',
+            b'        author_email=__author_email__,\n',
+            b'        description=__description__,\n',
+            b'        long_description=long_description,\n',
+            b'        long_description_content_type="text/markdown",\n',
+            b'        url=__url__,\n',
+            b'        packages=[pkg for pkg in find_packages() if pkg.startswith("' + bytes(self.package_name, 'utf-8') + b'")],\n',
+            b'        license=__license__,\n',
+            b'        classifiers=[\n',
+            b'            f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
+            b'        ],\n',
+            b'        install_requires=requirements\n',
+            b'    )\n',
         ])
         with open('setup.py', 'wb') as f:
             f.write(content)
@@ -196,15 +192,24 @@ class Create(Prep):
             raise FileExistsError("package.py already exist and may be used for other functionality")
         else:
             with open(self.pkg, 'a') as f:
-                f.write(
-                    'from qaviton_package_manager import Manager\n'
-                    '\n'
-                    f'url = "{escape(str(self.git.get_url())[2:-1])}"\n'
-                    f'username = "{escape(self.username)}"\n'
-                    f'password = "{escape(self.password)}"\n'
-                    f'package_name = "{escape(self.package_name)}"\n'
-                    'm = Manager(url, username, password)\n'
-                    'm.install()\n')
+                f.write(f'''from qaviton_package_manager import Manager
+
+# this approach might not be safe enough
+# Manager(
+#     url="https://github.com/qaviton/qaviton_package_manager.git", 
+#     username="contributor1", 
+#     password="123456", 
+#     pypi_user="owner", 
+#     pypi_pass="654321"
+# ).run(update=[], test=['python -m pytest tests'], build=[], upload=[])
+
+# $> python package.py --password "pwd" --pypi_pass "p1"
+Manager(
+  url="{escape(str(self.git.get_url())[2:-1])}", 
+  username="{escape(self.username)}",
+  pypi_user="{escape(self.pypi_user)}",
+).update().test('python -m pytest tests').build().upload().run()
+'''                     )
         log.info('created package.py file')
 
     def handle_git_ignore(self):

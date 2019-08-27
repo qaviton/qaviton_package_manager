@@ -4,7 +4,7 @@ from qaviton_package_manager.utils.logger import log
 from qaviton_package_manager.utils.functions import escape
 
 
-def git(*args): return run('git', *args).stdout
+def git(*args): return run('git', *args)
 
 
 class GitBase:
