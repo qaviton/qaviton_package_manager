@@ -44,6 +44,13 @@ class Build(Prep):
         git.create_branch(branch)
         try_to(git.create_remote)
         git.push(git.url, branch)
+        # TODO: checkout to {to_branch}/{version}
+        # TODO: create remote
+        # TODO: get git root dir
+        # TODO: move dist to root if path is not equal to root+os.sep+dist (if a different dist exists under root delete it first)
+        # TODO: remove all directories not starting with .
+        # TODO: commit & push
+        # TODO: print a comment on how to pip install the version from requirements file
         git.checkout(current_branch)
 
     def update_version(self, version):
@@ -72,5 +79,3 @@ class Build(Prep):
     @staticmethod
     def versiondate(version: str):
         return datetime.datetime(*[int(t) for t in version.split('.')])
-
-git.stash().fetch().create_branch('test').create_remote().push(f'{git.url()}')

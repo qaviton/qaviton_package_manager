@@ -57,12 +57,10 @@ def try_to(f, *args, **kwargs):
         return e
 
 
-def create_universal_wheel():
-    python('setup.py bdist_wheel --universal')
-
-
 def create_distibution_packages():
+    shutil.rmtree('build')
     shutil.rmtree('dist')
+    python('setup.py bdist_wheel --universal')
     python('setup.py sdist bdist_wheel')
 
 

@@ -20,7 +20,6 @@ from qaviton_package_manager.utils.logger import log
 from qaviton_package_manager.utils.functions import escape
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods import Prep
-from qaviton_package_manager.utils.functions import create_universal_wheel
 
 
 class HTTP:
@@ -191,8 +190,6 @@ class Create(Prep):
         ])
         with open('setup.py', 'wb') as f:
             f.write(content)
-        create_universal_wheel()
-
 
     def create_package_file(self):
         if os.path.exists(self.pkg):
