@@ -10,11 +10,14 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
+import os
+import shutil
 import datetime
 from qaviton_package_manager.utils.functions import create_distibution_packages
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.functions import try_to
 from qaviton_package_manager.manager_methods import Prep
+from qaviton_package_manager.utils.functions import escape
 
 
 class Build(Prep):
@@ -22,7 +25,7 @@ class Build(Prep):
         Prep.__init__(self, git, package_name)
         version = self.update_version(version)
         branch = f'{to_branch}/{version}'
-        msg = f'build candidate {to_branch}/{version}'
+        msg = f'build candidate {branch}'
         try_to(git.stash)
         try_to(git.commit, msg)
         git.fetch()
@@ -41,16 +44,32 @@ class Build(Prep):
         git.tag(f'version {version}', msg)
         git.push(git.url, to_branch)
 
-        git.create_branch(branch)
-        try_to(git.create_remote)
+        git.switch(branch)
+        git.create_remote()
+
+        create_distibution_packages()
+        dist_path = git.root+os.sep+'dist'
+        if self.root != git.root:
+            dist = self.root+os.sep+'dist'
+            if os.path.exists(dist_path):
+                shutil.rmtree(dist_path)
+            shutil.move(dist, dist_path)
+        root_files = os.listdir(git.root)
+        for name in root_files:
+            path = git.root+os.sep+name
+            if os.path.isdir(name):
+                if not (name.startswith('.') or name == 'dist'):
+                    shutil.rmtree(path)
+        git.add(dist_path+os.sep)
+        git.commit(msg)
+        git.tag(f'version {version}', msg)
         git.push(git.url, branch)
-        # TODO: checkout to {to_branch}/{version}
-        # TODO: create remote
-        # TODO: get git root dir
-        # TODO: move dist to root if path is not equal to root+os.sep+dist (if a different dist exists under root delete it first)
-        # TODO: remove all directories not starting with .
-        # TODO: commit & push
-        # TODO: print a comment on how to pip install the version from requirements file
+        req = f'git+{git.url}@{branch}#egg=dist'
+        print('you can now install this package:')
+        print('1) go to another project with git (make sure you have permissions)')
+        print('2) python -m venv venv (recommended)')
+        print('3) pip install qaviton_package_manager')
+        print(f'4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(req)}"')
         git.checkout(current_branch)
 
     def update_version(self, version):

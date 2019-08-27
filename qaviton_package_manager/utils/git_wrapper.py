@@ -1,5 +1,5 @@
 # from urllib.parse import quote_plus as urlencode
-from qaviton_package_manager.utils.system import run
+from qaviton_package_manager.utils.system import run, bs
 from qaviton_package_manager.utils.logger import log
 from qaviton_package_manager.utils.functions import escape
 
@@ -76,6 +76,7 @@ class Git(GitBase):
                 return git
             git.switch = switch
 
+        git.root = bs(git('rev-parse --show-toplevel'))
         git.url = url
         git.username = username
         git.password = password
@@ -174,5 +175,4 @@ class Git(GitBase):
     def delete_remote(git, branch): git(f'push origin --delete "{escape(branch)}"'); return git
     def delete_local(git, branch): git(f'branch -d "{escape(branch)}"'); return git
     def tag(git, name, msg): git(f'tag -a {name} -m "{escape(msg)}"'); return git
-
-
+    def add(git, arg='.', *args): git('add -f', arg, *args); return git
