@@ -1,9 +1,10 @@
-from urllib.parse import quote_plus as urlencode
+# from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.utils.system import run
 from qaviton_package_manager.utils.logger import log
+from qaviton_package_manager.utils.functions import escape
 
 
-def git(*args): return run('git ' + ' '.join(args)).stdout
+def git(*args): return run('git', *args).stdout
 
 
 class GitBase:
@@ -61,7 +62,7 @@ class RepoData:
 
 
 class Git(GitBase):
-    def __init__(git, url, username='', password=''):
+    def __init__(git, url=None, username=None, password=None):
         git.version = git('--version').replace(b'git version ', b'')
         v = git.version.split(b'.')
         if int(v[0]) < 2 or (int(v[0]) == 2 and int(v[1]) < 10):
@@ -70,60 +71,95 @@ class Git(GitBase):
         if int(v[0]) < 3 and int(v[1]) < 23:
             def switch(git, branch):
                 if git.exists(branch):
-                    git(f'checkout {branch}')
-                else: git(f'checkout -b {branch}')
+                    git(f'checkout "{escape(branch)}"')
+                else: git(f'checkout -b "{escape(branch)}"')
                 return git
             git.switch = switch
 
         git.url = url
         git.username = username
         git.password = password
-        if username: git.config_username()
-        if password: git.config_password()
-        # https://git-scm.com/book/tr/v2/Git-on-the-Server-The-Protocols
-        # we only support https authentication at the moment
-        remote_protocols = (
-            # 'git://',
-            # 'http://',
-            git._https_handler,
-            # 'ssh://',
-            # 'git://',
-            # 'file:///',
-            # '/',
-            # '\\'
-        )
-        for protocol in remote_protocols:
-            if protocol():
-                break
+
+        # # https://git-scm.com/book/tr/v2/Git-on-the-Server-The-Protocols
+        # # we only support https authentication at the moment
+        # remote_protocols = (
+        #     # 'git://',
+        #     # 'http://',
+        #     git._https_handler,
+        #     # 'ssh://',
+        #     # 'git://',
+        #     # 'file:///',
+        #     # '/',
+        #     # '\\'
+        # )
+        # for protocol in remote_protocols:
+        #     if protocol():
+        #         break
 
     def __del__(git):
         if git.password:
-            git.unset_password()
+            git(f'config --unset user.password "{escape(git.password)}"')
 
-    def _https_handler(git):
-        protocol = 'https://'
-        if git.url.startswith(protocol):
-            if git.username:
-                credentials = f'{urlencode(git.username)}:{urlencode(git.password)}@'
-            elif git.password:
-                credentials = f'{git.password}@'
-            else:
-                credentials = ''
-            git.url = f'{protocol}{credentials}{git.url[len(protocol):]}'
-            return True
+    # def _https_handler(git):
+    #     protocol = 'https://'
+    #     if git.url.startswith(protocol):
+    #         if git.username:
+    #             credentials = f'{urlencode(git.username)}:{urlencode(git.password)}@'
+    #         elif git.password:
+    #             credentials = f'{git.password}@'
+    #         else:
+    #             credentials = ''
+    #         git.url = f'{protocol}{credentials}{git.url[len(protocol):]}'
+    #         return True
 
-    def config_username(git): git(f'config user.name "{git.username}"'); return git
-    def config_password(git): git(f'config user.password "{git.password}"'); return git
-    def unset_password(git): git(f'config --unset user.password "{git.password}"'); return git
+    @property
+    def url(git):
+        return git._url
+
+    @url.setter
+    def url(git, value):
+        if value:
+            # git(f'config remote.origin.url "{escape(url)}"')
+            try:
+                git(f'remote add origin "{escape(value)}"')
+            except:
+                try:
+                    git(f'remote set-url origin "{escape(value)}"')
+                except:
+                    pass
+        git._url = value
+
+    @property
+    def username(git):
+        return git._username
+
+    @property
+    def password(git):
+        return git._password
+
+    @username.setter
+    def username(git, value):
+        if value:
+            git(f'config user.name "{escape(value)}"')
+        git._username = value
+
+    @password.setter
+    def password(git, value):
+        if value:
+            git(f'config user.password "{escape(value)}"')
+        git._password = value
+
+    def commit(git, msg): git(f'commit -m "{escape(msg)}"')
     def stash(git): git('stash'); return git
-    def fetch(git): git('fetch', git.url); return git
-    def pull(git): git('pull', git.url); return git
-    def push(git): git('push', git.url); return git
+    def fetch(git, *args): git('fetch', *args); return git
+    def pull(git, *args): git('pull --rebase', *args); return git
+    def push(git, *args): git('push', *args); return git
     def exists(git, branch): return bytes(branch, 'utf-8') in git.get_local_branches()
-    def switch(git, branch): git(f'switch -c {branch}'); return git
-    # def url(git)->bytes: return git('config --get remote.origin.url')
-    def create_branch(git, name): git(f'checkout -b {name}'); return git
-    def create_remote(git, branch=None): git(f'push -u {git.url} {git.get_current_branch() if branch is None else branch}'); return git
+    def switch(git, branch): git(f'switch -c "{escape(branch)}"'); return git
+    def get_url(git)->bytes: return git('config --get remote.origin.url')
+    def create_branch(git, name): git(f'checkout -b "{escape(name)}"'); return git
+    def checkout(git, to_branch): git(f'checkout  "{escape(to_branch)}"'); return git
+    def create_remote(git, branch=None): git(f'push -u origin "{escape(git.get_current_branch() if branch is None else branch)}"'); return git
     def get_config(git)->[bytes]: return git('config --list').splitlines()
     def get_current_branch(git)->bytes: return git('symbolic-ref --short HEAD').strip()
     def get_remote_branches(git)->[bytes]: return [branch.strip().split(b' -> ', 1)[0] for branch in git('branch -r').splitlines()]
@@ -135,3 +171,8 @@ class Git(GitBase):
                 branch = branch[2:]
                 branches[i] = branch
         return branches
+    def delete_remote(git, branch): git(f'push origin --delete "{escape(branch)}"'); return git
+    def delete_local(git, branch): git(f'branch -d "{escape(branch)}"'); return git
+    def tag(git, name, msg): git(f'tag -a {name} -m "{escape(msg)}"'); return git
+
+

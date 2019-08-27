@@ -18,6 +18,7 @@ from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.conf import supported_protocols
 from qaviton_package_manager.utils.functions import get_requirements
 from qaviton_package_manager.utils.git_wrapper import Git
+from qaviton_package_manager.utils.logger import log
 
 
 def get_packages(requirements_path):
@@ -67,3 +68,32 @@ class Operation(metaclass=ABCMeta):
     @abstractmethod
     def run(self):
         pass
+
+
+class Prep:
+    def __init__(self, git: Git, package_name: str):
+        self.root = os.getcwd()
+        self.git = git
+
+        self.setup_path = self.root+os.sep+'setup.py'
+        self.package_name = package_name
+
+        self.pkg_path = self.root+os.sep+package_name
+        self.pkg_init = self.pkg_path + os.sep + '__init__.py'
+
+    def get_pkg_init(self):
+        if not os.path.exists(self.pkg_path):
+            log.warning(f"direcotory: {self.pkg_path} is missing")
+            print("creating package...")
+            os.mkdir(self.pkg_path)
+            open(self.pkg_init, 'w').close()
+            init = b''
+        elif not os.path.exists(self.pkg_init):
+            log.warning(f"file: {self.pkg_init} is missing")
+            print("creating package init file...")
+            open(self.pkg_init, 'w').close()
+            init = b''
+        else:
+            with open(self.pkg_init, 'rb') as f:
+                init = f.read()
+        return init

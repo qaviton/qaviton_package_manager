@@ -20,31 +20,24 @@ from qaviton_package_manager.manager_methods.update_requirements import Update
 from qaviton_package_manager.manager_methods.remove_requirements import Remove
 from qaviton_package_manager.manager_methods.clean_requirements import Clean
 from qaviton_package_manager.manager_methods.save_version import Build
+from qaviton_package_manager.utils.system import run
 
 
 class Manager:
     def __init__(self, url=None, username=None, password=None, **kwargs):
-        self.url = url
-        self.username = username
-        self.password = password
-        self.kwargs = {}
+        self.kwargs = {'url': url, 'username': username, 'password': password}
         self._set_kwargs(kwargs)
         self._ord = list(kwargs.keys())
         self._get_external_args()
-        self.git = Git(self.url, self.username, self.password)
-        del self.username
-        del self.password
+        self.git = Git(kwargs['url'], kwargs['username'], kwargs['password'])
 
     def _set_kwargs(self, kwargs):
         self.kwargs.update({key: (value if isinstance(value, list) else [value]) for key, value in kwargs.items()})
 
     def _get_external_args(self):
         length = len(argv)
-        i = 4
+        i = 1
         if length > i:
-            self.url = argv[1]
-            self.username = argv[2]
-            self.password = argv[3]
             while i < length:
                 arg: str = argv[i]
                 if arg.startswith('--'):
@@ -70,4 +63,5 @@ class Manager:
     def update(self, *packages): Update(self.git, *packages)
     def clean(self, *packages): Clean(*packages)
     def remove(self, *packages): Remove(*packages)
+    def test(self, *test_commands): run(*test_commands)
     def build(self, package_name, to_branch='build', version=None): Build(self.git, package_name, to_branch=to_branch, version=version)

@@ -17,6 +17,10 @@ from qaviton_package_manager.utils.git_wrapper import RepoData
 from qaviton_package_manager.conf import LICENSE, README
 from qaviton_package_manager.utils.functions import get_requirements
 from qaviton_package_manager.utils.logger import log
+from qaviton_package_manager.utils.functions import escape
+from qaviton_package_manager.utils.git_wrapper import Git
+from qaviton_package_manager.manager_methods import Prep
+from qaviton_package_manager.utils.functions import create_universal_wheel
 
 
 class HTTP:
@@ -45,16 +49,13 @@ def select_license():
             print('invalid input, please select a valid number')
 
 
-class Create:
-    def __init__(self, package_name=None):
+class Create(Prep):
+    def __init__(self, git: Git, package_name=None):
         log.info("creating git packaging system")
+        Prep.__init__(self, git, package_name)
         self.username = input("enter your git username:")
         self.password = input("enter your git password:")
         self.repo = RepoData()
-        self.root = os.getcwd()
-
-        self.setup_path = self.root+os.sep+'setup.py'
-        self.package_name = package_name
 
         if os.path.exists(self.setup_path):
             raise FileExistsError("setup.py already exist")
@@ -63,8 +64,6 @@ class Create:
             self.package_name = self.root.rsplit(os.sep, 1)[1]
             log.warning('package name not specified, selecting dir name:', self.package_name)
 
-        self.pkg_path = self.root+os.sep+package_name
-        self.pkg_init = self.pkg_path + os.sep + '__init__.py'
         self.git_ignore = self.root + os.sep + '.gitignore'
         self.pkg = self.root + os.sep + 'package.py'
         self.run()
@@ -86,23 +85,6 @@ class Create:
         self.create_setup_file(readme, requirements)
         self.create_package_file()
         self.handle_git_ignore()
-
-    def get_pkg_init(self):
-        if not os.path.exists(self.pkg_path):
-            log.warning(f"direcotory: {self.pkg_path} is missing")
-            print("creating package...")
-            os.mkdir(self.pkg_path)
-            open(self.pkg_init, 'w').close()
-            init = b''
-        elif not os.path.exists(self.pkg_init):
-            log.warning(f"file: {self.pkg_init} is missing")
-            print("creating package init file...")
-            open(self.pkg_init, 'w').close()
-            init = b''
-        else:
-            with open(self.pkg_init, 'rb') as f:
-                init = f.read()
-        return init
 
     def get_license(self):
         license = self.root + os.sep + LICENSE
@@ -209,6 +191,8 @@ class Create:
         ])
         with open('setup.py', 'wb') as f:
             f.write(content)
+        create_universal_wheel()
+
 
     def create_package_file(self):
         if os.path.exists(self.pkg):
@@ -218,10 +202,11 @@ class Create:
                 f.write(
                     'from qaviton_package_manager import Manager\n'
                     '\n'
-                    f'username = "{self.username}"\n'
-                    f'password = "{self.password}"\n'
-                    f'package_name = "{self.package_name}"'
-                    'm = Manager(username, password)\n'
+                    f'url = "{escape(str(self.git.get_url())[2:-1])}"\n'
+                    f'username = "{escape(self.username)}"\n'
+                    f'password = "{escape(self.password)}"\n'
+                    f'package_name = "{escape(self.package_name)}"\n'
+                    'm = Manager(url, username, password)\n'
                     'm.install()\n')
         log.info('created package.py file')
 

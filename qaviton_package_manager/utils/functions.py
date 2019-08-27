@@ -1,6 +1,8 @@
 import os
+import shutil
 from qaviton_package_manager.conf import REQUIREMENTS
 from qaviton_package_manager.utils.pip_wrapper import pip
+from qaviton_package_manager.utils.system import python
 
 
 def get_requirements(root):
@@ -14,3 +16,56 @@ def get_requirements(root):
         if not os.path.exists(requirements):
             pip.freeze(requirements)
     return requirements
+
+
+def escape(string):
+    """escape double quote"""
+    s = []
+    add = s.append
+    i = 0
+    size = len(string)
+    while i < size:
+
+        # ignore back slashes and the char after them
+        if string[i] == '\\':
+            while i < size:
+                add(string[i])
+                i += 1
+
+                if string[i] != '\\':
+                    add(string[i])
+                    i += 1
+                    break
+
+        # avoid double quotes
+        elif string[i] == '"':
+            add('\\')
+            add(string[i])
+            i += 1
+
+        else:
+            add(string[i])
+            i += 1
+
+    return "".join(s)
+
+
+def try_to(f, *args, **kwargs):
+    try:
+        return f(*args, **kwargs)
+    except Exception as e:
+        return e
+
+
+def create_universal_wheel():
+    python('setup.py bdist_wheel --universal')
+
+
+def create_distibution_packages():
+    shutil.rmtree('dist')
+    python('setup.py sdist bdist_wheel')
+
+
+def upload_to_pypi(username, password):
+    create_distibution_packages()
+    python(f'-m twine upload -u "{username}" -p "{password}" dist/*')
