@@ -69,12 +69,12 @@ class Git(GitBase):
             raise OSError(f"git version {v[2:-1]} is not supported, please install a newer version:"
                           "\nhttps://git-scm.com/book/en/v2/Getting-Started-Installing-Git")
         # if int(v[0]) < 3 and int(v[1]) < 23:
-        def switch(git, branch):
-            if git.exists(branch):
-                git(f'checkout "{escape(branch)}"')
-            else: git(f'checkout -b "{escape(branch)}"')
-            return git
-        git.switch = switch
+        #     def switch(git, branch):
+        #         if git.exists(branch):
+        #             git(f'checkout "{escape(branch)}"')
+        #         else: git(f'checkout -b "{escape(branch)}"')
+        #         return git
+        #     git.switch = switch
 
         git.credential_mode = git('config --get credential.helper').decode('utf-8').splitlines()[0]
         git('config credential.helper store')
@@ -166,7 +166,13 @@ class Git(GitBase):
     def pull(git, *args): git('pull --rebase', *args); return git
     def push(git, *args): git('push', *args); return git
     def exists(git, branch): return bytes(branch, 'utf-8') in git.get_local_branches()
-    def switch(git, branch): git(f'switch -c "{escape(branch)}"'); return git
+    def switch(git, branch):
+        # git(f'switch -c "{escape(branch)}"'); return git
+        if git.exists(branch):
+            git(f'checkout "{escape(branch)}"')
+        else:
+            git(f'checkout -b "{escape(branch)}"')
+        return git
     def get_url(git)->bytes: return git('config --get remote.origin.url')
     def get_username(git) -> bytes: return git('config --get user.name')
     def get_password(git) -> bytes: return git('config --get user.password')
