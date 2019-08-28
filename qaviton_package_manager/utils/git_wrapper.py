@@ -101,7 +101,7 @@ class Git(GitBase):
         #         break
 
     def __del__(git):
-        git(f'config credential.helper {git.credential_mode}')
+        git(f'config --unset credential.helper store')
         if git.password:
             git(f'config --unset user.password "{escape(git.password)}"')
 
