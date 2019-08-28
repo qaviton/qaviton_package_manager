@@ -73,4 +73,4 @@ def upload_to_pypi(username, password):
 
 
 def get_package_name():
-    python('-c "from setup import package_name\nprint(package_name)"').decode('utf-8')
+    return python('-c "from setup import package_name\nprint(package_name)"').decode('utf-8')
