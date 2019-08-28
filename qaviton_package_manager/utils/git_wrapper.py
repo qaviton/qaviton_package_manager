@@ -76,12 +76,14 @@ class Git(GitBase):
                 return git
             git.switch = switch
 
+        git.credential_mode = git('config --get credential.helper')
+        git('config credential.helper store')
         git.root = bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
         git.url = url
         if username: git.username = username
-        else: git.username = git.get_username()
+        else: git._username = git.get_username()
         if password: git.password = password
-        else: git.password = git.get_password()
+        else: git._password = git.get_password()
         # # https://git-scm.com/book/tr/v2/Git-on-the-Server-The-Protocols
         # # we only support https authentication at the moment
         # remote_protocols = (
@@ -99,6 +101,7 @@ class Git(GitBase):
         #         break
 
     def __del__(git):
+        git(f'config credential.helper {git.credential_mode}')
         if git.password:
             git(f'config --unset user.password "{escape(git.password)}"')
 
