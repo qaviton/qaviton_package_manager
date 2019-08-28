@@ -68,13 +68,13 @@ class Git(GitBase):
         if int(v[0]) < 2 or (int(v[0]) == 2 and int(v[1]) < 16):
             raise OSError(f"git version {v[2:-1]} is not supported, please install a newer version:"
                           "\nhttps://git-scm.com/book/en/v2/Getting-Started-Installing-Git")
-        if int(v[0]) < 3 and int(v[1]) < 23:
-            def switch(git, branch):
-                if git.exists(branch):
-                    git(f'checkout "{escape(branch)}"')
-                else: git(f'checkout -b "{escape(branch)}"')
-                return git
-            git.switch = switch
+        # if int(v[0]) < 3 and int(v[1]) < 23:
+        def switch(git, branch):
+            if git.exists(branch):
+                git(f'checkout "{escape(branch)}"')
+            else: git(f'checkout -b "{escape(branch)}"')
+            return git
+        git.switch = switch
 
         git.credential_mode = git('config --get credential.helper').decode('utf-8').splitlines()[0]
         git('config credential.helper store')
