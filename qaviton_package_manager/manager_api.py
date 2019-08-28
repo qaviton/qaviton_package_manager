@@ -71,5 +71,5 @@ class Manager:
     def clean(self, *packages): Clean(*packages); return self
     def remove(self, *packages): Remove(*packages); return self
     def test(self, *test_commands): run(*test_commands); return self
-    def build(self, to_branch='build', version=None): Build(self.git, to_branch=to_branch, version=version); return self
+    def build(self, to_branch='build/latest', version=None): Build(self.git, to_branch=to_branch, version=version); return self
     def upload(self): Upload(self.kwargs['pypi_user'], self.kwargs['pypi_pass']); return self

@@ -21,11 +21,11 @@ from qaviton_package_manager.utils.functions import get_package_name
 
 
 class Build(Prep):
-    def __init__(self, git: Git, to_branch='build', version=None):
+    def __init__(self, git: Git, to_branch: str, version: str):
         self.package_name = get_package_name()
         Prep.__init__(self, git, self.package_name)
         version = self.update_version(version)
-        branch = f'{to_branch}/{version}'
+        branch = f'{to_branch.rsplit("/", 1)[0]}/{version}'
         msg = f'build candidate {branch}'
         try_to(git.stash)
         try_to(git.commit, msg)
