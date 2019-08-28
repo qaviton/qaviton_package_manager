@@ -80,7 +80,7 @@ class Build(Prep):
     def versioning(version):
         if version is None:
             d = datetime.datetime.utcnow()
-            version = f'{d.year}.{d.month}.{d.day}.{d.hour}.{d.min}.{d.second}.{d.microsecond}'
+            version = f'{d.year}.{d.month}.{d.day}.{d.hour}.{d.minute}.{d.second}.{d.microsecond}'
         return version
 
     @staticmethod
