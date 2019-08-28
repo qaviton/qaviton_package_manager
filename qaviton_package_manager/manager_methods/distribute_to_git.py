@@ -34,7 +34,7 @@ class Build(Prep):
 
         local_branches = git.get_local_branches()
         # remote_branches = [branch.split(b'/', 1)[1] for branch in git.get_remote_branches()]
-        current_branch = git.get_current_branch()
+        current_branch = git.get_current_branch().decode('utf-8')
         if to_branch.encode('utf-8') not in local_branches:
             git.create_branch(to_branch).create_remote()
         elif to_branch != current_branch:
