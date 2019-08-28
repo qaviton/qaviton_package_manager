@@ -78,18 +78,15 @@ class Git(GitBase):
 
         git.credential_mode = git('config --get credential.helper').decode('utf-8').splitlines()[0]
         git('config credential.helper store')
-        git(f'config --unset credential.helper {git.credential_mode}')
         git.root = bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
         git.url = url
 
         if username:
-            git('config --unset user.name')
             git.username = username
         else:
             git._username = git.get_username()
 
         if password:
-            git('config --unset user.password')
             git.password = password
         else:
             git._password = git.get_password()
@@ -111,7 +108,6 @@ class Git(GitBase):
 
     def __del__(git):
         git(f'config --unset credential.helper store')
-        git(f'config credential.helper {git.credential_mode}')
         if git.password:
             git(f'config --unset user.password "{escape(git.password)}"')
 
