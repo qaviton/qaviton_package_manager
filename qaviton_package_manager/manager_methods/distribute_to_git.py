@@ -63,7 +63,7 @@ class Build(Prep):
     def update_version(self, version):
         version = self.versioning(version)
         content = self.get_pkg_init()
-        if b'\n__version__' not in content or not content.startswith(b'__version__'):
+        if b'\n__version__' not in content and not content.startswith(b'__version__'):
             raise IOError("missing __version__ in the package __init__.py file")
         lines = content.splitlines()
         for i, line in enumerate(lines):
