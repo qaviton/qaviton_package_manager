@@ -78,9 +78,10 @@ class Git(GitBase):
 
         git.root = bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
         git.url = url
-        git.username = username
-        git.password = password
-
+        if username: git.username = username
+        else: git.username = git.get_username()
+        if password: git.password = password
+        else: git.password = git.get_password()
         # # https://git-scm.com/book/tr/v2/Git-on-the-Server-The-Protocols
         # # we only support https authentication at the moment
         # remote_protocols = (
@@ -158,6 +159,8 @@ class Git(GitBase):
     def exists(git, branch): return bytes(branch, 'utf-8') in git.get_local_branches()
     def switch(git, branch): git(f'switch -c "{escape(branch)}"'); return git
     def get_url(git)->bytes: return git('config --get remote.origin.url')
+    def get_username(git) -> bytes: return git('config --get user.name')
+    def get_password(git) -> bytes: return git('config --get user.password')
     def create_branch(git, name): git(f'checkout -b "{escape(name)}"'); return git
     def checkout(git, to_branch): git(f'checkout "{escape(to_branch)}"'); return git
     def create_remote(git, branch=None): git(f'push -u origin "{escape(git.get_current_branch().decode("utf-8") if branch is None else branch)}"'); return git
