@@ -70,7 +70,7 @@ class Build(Prep):
             if line.startswith(b'__version__'):
                 line = line.split(b'=', 1)
                 line[0] = line[0].rstrip()
-                line[1] = version.encode('utf-8')
+                line[1] = f'"{version.encode("utf-8")}"'
                 lines[i] = b' = '.join(line)
                 break
         with open(self.pkg_init, 'wb') as f:
