@@ -69,7 +69,7 @@ class Build(Prep):
         for i, line in enumerate(lines):
             if line.startswith(b'__version__'):
                 line = line.split(b'=', 1)
-                line[0] = line[0].strip()
+                line[0] = line[0].rstrip()
                 line[1] = version.encode('utf-8')
                 lines[i] = b' = '.join(line)
                 break
