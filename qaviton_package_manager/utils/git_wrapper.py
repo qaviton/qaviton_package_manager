@@ -76,7 +76,7 @@ class Git(GitBase):
                 return git
             git.switch = switch
 
-        git.credential_mode = git('config --get credential.helper').decode('utf-8')
+        git.credential_mode = git('config --get credential.helper').decode('utf-8').splitlines()[0]
         git('config credential.helper store')
         git(f'config --unset credential.helper {git.credential_mode}')
         git.root = bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
