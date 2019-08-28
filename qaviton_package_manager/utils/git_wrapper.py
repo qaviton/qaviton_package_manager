@@ -78,6 +78,7 @@ class Git(GitBase):
 
         git.credential_mode = git('config --get credential.helper')
         git('config credential.helper store')
+        git(f'config --unset credential.helper {git.credential_mode}')
         git.root = bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
         git.url = url
         if username: git.username = username
