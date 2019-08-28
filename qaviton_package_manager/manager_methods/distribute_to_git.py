@@ -12,20 +12,18 @@
 # language governing permissions and limitations under the License.
 
 
-# import os
-# import shutil
 import datetime
-# from qaviton_package_manager.utils.functions import create_distibution_packages
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.functions import try_to
 from qaviton_package_manager.manager_methods import Prep
 from qaviton_package_manager.utils.functions import escape
-# from urllib.parse import quote_plus as urlencode
+from qaviton_package_manager.utils.functions import get_package_name
 
 
 class Build(Prep):
     def __init__(self, git: Git, to_branch='build', version=None):
-        Prep.__init__(self, git)
+        self.package_name = get_package_name()
+        Prep.__init__(self, git, self.package_name)
         version = self.update_version(version)
         branch = f'{to_branch}/{version}'
         msg = f'build candidate {branch}'

@@ -36,7 +36,7 @@ class Manager:
         self._set_kwargs(kwargs)
         self._ord = list(kwargs.keys())
         self._get_external_args()
-        self.git = Git(kwargs['url'], kwargs['username'], kwargs['password'])
+        self.git = Git(self.kwargs['url'], self.kwargs['username'], self.kwargs['password'])
 
     def _set_kwargs(self, kwargs):
         self.kwargs.update({key: (value if isinstance(value, list) else [value]) for key, value in kwargs.items()})
@@ -65,7 +65,7 @@ class Manager:
         for key in self._ord:
             getattr(self, key)(*self.kwargs[key])
 
-    def create(self, package_name=None): Create(package_name); return self
+    def create(self, package_name=None): Create(self.git, package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self
     def update(self, *packages): Update(self.git, *packages); return self
     def clean(self, *packages): Clean(*packages); return self

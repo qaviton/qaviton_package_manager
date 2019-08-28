@@ -1,4 +1,4 @@
-# from urllib.parse import quote_plus as urlencode
+import os
 from qaviton_package_manager.utils.system import run, bs
 from qaviton_package_manager.utils.logger import log
 from qaviton_package_manager.utils.functions import escape
@@ -76,7 +76,7 @@ class Git(GitBase):
                 return git
             git.switch = switch
 
-        git.root = bs(git('rev-parse --show-toplevel'))
+        git.root = bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
         git.url = url
         git.username = username
         git.password = password
