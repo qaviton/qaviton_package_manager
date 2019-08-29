@@ -8,6 +8,8 @@ from qaviton_package_manager.utils.functions import find_free_port
 from traceback import format_exc
 from qaviton_package_manager.conf import ignore_list
 from qaviton_package_manager.utils.git_wrapper import get_root
+from qaviton_package_manager.utils.system import pythonCIO
+from qaviton_package_manager.utils.functions import try_to
 
 
 class ServerDownError(ConnectionAbortedError):
@@ -24,18 +26,32 @@ class Cache:
         delete = 'DELETE'
         post = 'POST'
 
+    def kill_server(self):
+        pid = self.get_file_content()['pid']
+        try_to(psutil.Process(pid).kill)
+        self.remove_file()
+
+    def get_file_content(self):
+        with open(self.file) as f:
+            content = json.load(f)
+        return content
+
+    def is_file(self):
+        return os.path.exists(self.file)
+
     def remove_file(self):
-        os.remove(self.file)
+        if self.is_file():
+            os.remove(self.file)
 
     def wait_for_file(self, timeout):
         t = time()
-        while not os.path.exists(self.file):
+        while not self.is_file():
             if time()-t > timeout:
                 raise TimeoutError("timed out while waiting for server details")
             sleep(0.1)
 
     def server_is_alive(self, timeout=5):
-        if not os.path.exists(self.file):
+        if not self.is_file():
             return False
         try:
             self.client(timeout, self.method.get)
@@ -49,23 +65,20 @@ class Cache:
         server_address = ('localhost', port)
         with Listener(server_address, authkey=self.authkey) as listener:
             listener._listener._socket.settimeout(timeout if timeout < 60*60*24 else 60*60*24)  # avoid OverflowError: timeout doesn't fit into C timeval
-            t = time()
-            server_data = {
-                'key': self.authkey.decode('utf-8'),
-                'address': list(server_address),
-                'time': t,
-                'timeout': timeout,
-                'pid': os.getpid()
-            }
+            pid = os.getpid()
+            p = psutil.Process(pid)
             with open(self.file, 'w') as f:
-                json.dump(server_data, f, indent=2)
+                json.dump({
+                    'key': self.authkey.decode('utf-8'),
+                    'address': list(server_address),
+                    'timeout': timeout,
+                    'pid': pid,
+                    'name': p.name(),
+                    'created': p.create_time()
+                }, f, indent=2)
+            del pid
+            del p
             while True:
-                if timeout > time() or timeout == -1:
-                    if time() > t + 1:
-                        t = time()
-                        server_data['time'] = t
-                        with open(self.file, 'w') as f:
-                            json.dump(server_data, f, indent=2)
                 try:
                     conn = listener.accept()
                 except socket.timeout:
@@ -98,16 +111,24 @@ class Cache:
 
     def client(self, timeout, method, **kwargs):
         self.wait_for_file(timeout)
-        with open(self.file) as f:
-            d = json.load(f)
+        d = self.get_file_content()
+        server_key = d['key']
+        server_address = tuple(d['address'])
+        server_timeout = d['timeout']
+        server_pid = d['pid']
+        server_name = d['name']
+        server_created = d['created']
 
-        key, server_address, t, server_timeout, pid = d['key'], tuple(d['address']), d['time'], d['timeout'], d['pid']
-        if time() > server_timeout != -1 and time() - t < 4 and psutil.pid_exists(pid):
-            connections = [c for c in psutil.Process(pid).connections() if c.status == psutil.CONN_LISTEN]
+        if time() > server_timeout != -1 and psutil.pid_exists(server_pid):
+            server_process = psutil.Process(server_pid)
+            connections = [c for c in server_process.connections() if c.status == psutil.CONN_LISTEN]
             for c in connections:
-                if server_address[1] == c[3][1]:  # check process is listening to port
+                # check process is listening to port
+                if server_address[1] == c[3][1]\
+                and server_process.name() == server_name\
+                and server_process.create_time() == server_created:
                     client_address = ('localhost', find_free_port())
-                    with Client(server_address, authkey=key.encode('utf-8')) as conn:
+                    with Client(server_address, authkey=server_key.encode('utf-8')) as conn:
                         conn.send({
                             'token': self.authkey.decode('utf-8'),
                             'address': list(client_address),
@@ -122,3 +143,13 @@ class Cache:
                             raise ConnectionError(data['error'])
                     return data
         raise ServerDownError("the cache server is down")
+
+    def create_server(self, cache_timeout, **kwargs):
+        self.remove_file()
+        p = pythonCIO(
+            'from qaviton_package_manager.utils.cache_cred import Cache',
+            'cache = Cache()',
+            f'cache.server({cache_timeout}, **{kwargs})'
+        )
+        self.wait_for_file(timeout=10)
+        return p

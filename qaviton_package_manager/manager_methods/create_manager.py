@@ -17,7 +17,7 @@ from qaviton_package_manager.utils.git_wrapper import RepoData
 from qaviton_package_manager.conf import LICENSE, README
 from qaviton_package_manager.utils.functions import get_requirements
 from qaviton_package_manager.utils.logger import log
-from qaviton_package_manager.utils.functions import escape
+from qaviton_package_manager.utils.system import escape
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods import Prep
 from qaviton_package_manager.conf import ignore_list

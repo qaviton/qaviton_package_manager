@@ -21,7 +21,6 @@ from qaviton_package_manager.manager_methods.remove_requirements import Remove
 from qaviton_package_manager.manager_methods.clean_requirements import Clean
 from qaviton_package_manager.manager_methods.distribute_to_git import Build
 from qaviton_package_manager.manager_methods.distribute_to_pypi import Upload
-from qaviton_package_manager.utils.system import run
 from qaviton_package_manager.utils.cache_cred import Cache
 
 
@@ -48,14 +47,9 @@ class Manager:
         self._ord = list(kwargs.keys())
         self._get_external_args()
         self.git = Git(self.vars['url'], self.vars['username'], self.vars['password'])
-        self.git.username
         cache = Cache()
         if not cache.server_is_alive():
-            for key, value in self.vars.items():
-                if value is None:
-                    input(f'please input {0}')
-            cache.server(**self.vars)
-
+            cache.create_server(**self.vars)
 
     def _set_kwargs(self, kwargs):
         for key, value in kwargs.items():

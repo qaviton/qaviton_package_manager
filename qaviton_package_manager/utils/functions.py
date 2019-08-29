@@ -20,38 +20,6 @@ def get_requirements(root):
     return requirements
 
 
-def escape(string):
-    """escape double quote"""
-    s = []
-    add = s.append
-    i = 0
-    size = len(string)
-    while i < size:
-
-        # ignore back slashes and the char after them
-        if string[i] == '\\':
-            while i < size:
-                add(string[i])
-                i += 1
-
-                if string[i] != '\\':
-                    add(string[i])
-                    i += 1
-                    break
-
-        # avoid double quotes
-        elif string[i] == '"':
-            add('\\')
-            add(string[i])
-            i += 1
-
-        else:
-            add(string[i])
-            i += 1
-
-    return "".join(s)
-
-
 def try_to(f, *args, **kwargs):
     try:
         return f(*args, **kwargs)

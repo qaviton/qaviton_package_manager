@@ -1,7 +1,7 @@
 import os
 from qaviton_package_manager.utils.system import run, bs
 from qaviton_package_manager.utils.logger import log
-from qaviton_package_manager.utils.functions import escape
+from qaviton_package_manager.utils.system import escape
 from qaviton_package_manager.utils.functions import try_to
 
 
