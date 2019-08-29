@@ -22,22 +22,40 @@ from qaviton_package_manager.manager_methods.clean_requirements import Clean
 from qaviton_package_manager.manager_methods.distribute_to_git import Build
 from qaviton_package_manager.manager_methods.distribute_to_pypi import Upload
 from qaviton_package_manager.utils.system import run
+from qaviton_package_manager.utils.cache_cred import Cache
 
 
 class Manager:
-    def __init__(self, url=None, username=None, password=None, pypi_user=None, pypi_pass=None, **kwargs):
+    def __init__(
+            self,
+            url=None,
+            username=None,
+            password=None,
+            pypi_user=None,
+            pypi_pass=None,
+            cache_timeout=60*60*24*356,
+            **kwargs):
         self.vars = {
             'url': url,
             'username': username,
             'password': password,
             'pypi_user': pypi_user,
             'pypi_pass': pypi_pass,
+            'cache_timeout': cache_timeout,
         }
         self.kwargs = {}
         self._set_kwargs(kwargs)
         self._ord = list(kwargs.keys())
         self._get_external_args()
         self.git = Git(self.vars['url'], self.vars['username'], self.vars['password'])
+        self.git.username
+        cache = Cache()
+        if not cache.server_is_alive():
+            for key, value in self.vars.items():
+                if value is None:
+                    input(f'please input {0}')
+            cache.server(**self.vars)
+
 
     def _set_kwargs(self, kwargs):
         for key, value in kwargs.items():

@@ -1,7 +1,9 @@
 from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.utils.pip_wrapper import pip
+from qaviton_package_manager.utils.git_wrapper import git
 from qaviton_package_manager.utils.cache_cred import Cache
 from package import manager
+import multiprocessing
 
 
 def test_pip_install(username="", password=""):
@@ -32,8 +34,17 @@ def test_uninstall():
 
 
 def test_cache():
+    timeout = 30
     cache = Cache()
-    cache.server(3)
+    cache.remove_file()
+    server_cached_data = {'username': 'pinki'}
+    p = multiprocessing.Process(target=cache.server, args=(timeout,), kwargs=server_cached_data)
+    p.start()
+    response = cache.client(timeout, cache.method.get, username=True)
+    assert response == server_cached_data
+    p.join(timeout=timeout)
 
 
-test_cache()
+# if __name__ == "__main__":
+#     test_cache()
+print(git('config --get user.name'))
