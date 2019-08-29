@@ -31,18 +31,18 @@ class ManagerOperation(metaclass=ABCMeta):
     def __init__(self, git: Git, *packages):
         self.git = git
         self.packages = packages
-        self.requirements_path = get_requirements(os.getcwd())
+        self.requirements_path = get_requirements(git.root)
         self.run()
 
     def configure_packages(self):
         configured_packages = list(self.packages)
-        for i, pkg in enumerate(configured_packages):
-            for supported_protocol in supported_protocols:
-                if pkg.startswith(supported_protocol):
-                    configured_packages[i] = \
-                        supported_protocol + \
-                        f'{urlencode(self.git.username)}:{urlencode(self.git.password)}@' + \
-                        pkg[len(supported_protocol):]
+        # for i, pkg in enumerate(configured_packages):
+        #     for supported_protocol in supported_protocols:
+        #         if pkg.startswith(supported_protocol):
+        #             configured_packages[i] = \
+        #                 supported_protocol + \
+        #                 f'{urlencode(self.git.username)}:{urlencode(self.git.password)}@' + \
+        #                 pkg[len(supported_protocol):]
         return configured_packages
 
     def get_packages_from_requirements(self):
@@ -53,26 +53,26 @@ class ManagerOperation(metaclass=ABCMeta):
         pass
 
 
-class Operation(metaclass=ABCMeta):
-    def __init__(self, *packages):
-        self.packages = packages
-        self.requirements_path = get_requirements(os.getcwd())
-        self.run()
-
-    def configure_packages(self):
-        return list(self.packages)
-
-    def get_packages_from_requirements(self):
-        self.packages = get_packages(self.requirements_path)
-
-    @abstractmethod
-    def run(self):
-        pass
+# class Operation(metaclass=ABCMeta):
+#     def __init__(self, *packages):
+#         self.packages = packages
+#         self.requirements_path = get_requirements(git.root)
+#         self.run()
+#
+#     def configure_packages(self):
+#         return list(self.packages)
+#
+#     def get_packages_from_requirements(self):
+#         self.packages = get_packages(self.requirements_path)
+#
+#     @abstractmethod
+#     def run(self):
+#         pass
 
 
 class Prep:
     def __init__(self, git: Git, package_name: str):
-        self.root = os.getcwd()
+        self.root = git.root
         self.git = git
 
         self.setup_path = self.root+os.sep+'setup.py'

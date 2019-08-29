@@ -13,10 +13,10 @@
 
 
 from qaviton_package_manager.utils.pip_wrapper import pip
-from qaviton_package_manager.manager_methods import Operation
+from qaviton_package_manager.manager_methods import ManagerOperation
 
 
-class Clean(Operation):
+class Clean(ManagerOperation):
     def run(self):
         if len(self.packages) == 0 or self.packages[0] is None:
             self.get_packages_from_requirements()

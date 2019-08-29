@@ -1,6 +1,6 @@
 from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.utils.pip_wrapper import pip
-from qaviton_package_manager import Manager
+from package import manager
 
 
 def test_pip_install(username="", password=""):
@@ -11,5 +11,14 @@ def test_pip_install(username="", password=""):
 
 
 def test_create_setup():
-    m = Manager()
-    m.create('my_test_manager')
+    manager.create('my_test_manager')
+
+
+def test_install():
+    from sys import argv
+    argv.append('--install')
+    argv.append('cachetools')
+    manager._get_external_args()
+    manager.run()
+
+test_install()

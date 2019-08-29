@@ -24,14 +24,15 @@ class Install(ManagerOperation):
 
         pip.install(*self.configure_packages())
 
-        if not install_requirements and self.packages:
-            with open(self.requirements_path) as f:
-                packages = f.read().splitlines()
-            for i, package in enumerate(packages):
-                for added in self.packages:
-                    if added == package:
-                        packages[i] = None
-            packages = [pkg for pkg in packages if pkg is not None]
-            if packages:
-                with open(self.requirements_path, 'a') as f:
-                    f.write('\n'+'\n'.join(self.packages))
+        # TODO: fix this, add check for version evaluation
+        # if not install_requirements and self.packages:
+        #     with open(self.requirements_path) as f:
+        #         packages = f.read().splitlines()
+        #     for i, package in enumerate(packages):
+        #         for added in self.packages:
+        #             if added == package:
+        #                 packages[i] = None
+        #     packages = [pkg for pkg in packages if pkg is not None]
+        #     if packages:
+        #         with open(self.requirements_path, 'a') as f:
+        #             f.write('\n'+'\n'.join(self.packages))

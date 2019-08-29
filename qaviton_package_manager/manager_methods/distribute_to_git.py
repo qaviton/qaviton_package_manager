@@ -48,7 +48,7 @@ class Build(Prep):
 
         git.switch(branch)
         git.create_remote()
-        git.push(git.url, branch)
+        # git.push(git.url, branch)
         req = f'git+{git.url}@{branch}'
         latest = f'git+{git.url}@{to_branch}'
         print('you can now install this package:')

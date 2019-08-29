@@ -26,20 +26,25 @@ from qaviton_package_manager.utils.system import run
 
 class Manager:
     def __init__(self, url=None, username=None, password=None, pypi_user=None, pypi_pass=None, **kwargs):
-        self.kwargs = {
+        self.vars = {
             'url': url,
             'username': username,
             'password': password,
             'pypi_user': pypi_user,
             'pypi_pass': pypi_pass,
         }
+        self.kwargs = {}
         self._set_kwargs(kwargs)
         self._ord = list(kwargs.keys())
         self._get_external_args()
-        self.git = Git(self.kwargs['url'], self.kwargs['username'], self.kwargs['password'])
+        self.git = Git(self.vars['url'], self.vars['username'], self.vars['password'])
 
     def _set_kwargs(self, kwargs):
-        self.kwargs.update({key: (value if isinstance(value, list) else [value]) for key, value in kwargs.items()})
+        for key, value in kwargs.items():
+            if key in self.vars:
+                self.vars[key] = value
+            else:
+                self.kwargs[key] = value if isinstance(value, list) else [value]
 
     def _get_external_args(self):
         length = len(argv)
@@ -49,11 +54,17 @@ class Manager:
                 arg: str = argv[i]
                 if arg.startswith('--'):
                     api = arg[2:]
+                    if api in self.vars:
+                        try:
+                            self.vars[api] = argv[i+1]
+                        except:
+                            raise ValueError(f"parameter {api} is missing a value")
+                        i += 2
+                        continue
                     args = []
-                    if not i+1 >= len(argv) and not argv[i+1].startswith('--'):
-                        while not argv[i+1].startswith('--'):
-                            i += 1
-                            args.append(argv[i])
+                    while not i+1 >= len(argv) and not argv[i+1].startswith('--'):
+                        i += 1
+                        args.append(argv[i])
                     self.kwargs[api] = args
                     if api not in self._ord:
                         self._ord.append(api)
@@ -68,8 +79,8 @@ class Manager:
     def create(self, package_name=None): Create(self.git, package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self
     def update(self, *packages): Update(self.git, *packages); return self
-    def clean(self, *packages): Clean(*packages); return self
+    def clean(self, *packages): Clean(self.git, *packages); return self
     def remove(self, *packages): Remove(*packages); return self
     def test(self, *test_commands): run(*test_commands); return self
     def build(self, to_branch='build/latest', version=None): Build(self.git, to_branch=to_branch, version=version); return self
-    def upload(self): Upload(self.kwargs['pypi_user'], self.kwargs['pypi_pass']); return self
+    def upload(self): Upload(self.vars['pypi_user'], self.vars['pypi_pass']); return self

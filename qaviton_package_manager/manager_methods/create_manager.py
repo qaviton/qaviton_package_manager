@@ -53,15 +53,12 @@ class Create(Prep):
         log.info("creating git packaging system")
 
         if package_name is None:
-            self.package_name = os.getcwd().rsplit(os.sep, 1)[1]
+            self.package_name = git.root.rsplit(os.sep, 1)[1]
             log.warning('package name not specified, selecting dir name:', self.package_name)
         else:
             self.package_name = package_name
 
         Prep.__init__(self, git, self.package_name)
-        if self.root != git.root:
-            raise OSError("working directory needs to be the same as the git root directory, nested packages are not supported\n"
-                          f"{self.root} != {git.root}")
         self.username = input("enter your git username:")
         self.pypi_user = input("enter your pypi username:")
         self.repo = RepoData()
