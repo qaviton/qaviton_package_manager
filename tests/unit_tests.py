@@ -1,5 +1,6 @@
 from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.utils.pip_wrapper import pip
+from qaviton_package_manager.utils.cache_cred import Cache
 from package import manager
 
 
@@ -29,4 +30,10 @@ def test_uninstall():
     manager._get_external_args()
     manager.run()
 
-test_uninstall()
+
+def test_cache():
+    cache = Cache()
+    cache.server(3)
+
+
+test_cache()

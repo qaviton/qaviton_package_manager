@@ -6,6 +6,7 @@ from qaviton_package_manager.utils.functions import try_to
 
 
 def git(*args): return run('git', *args)
+def get_root(): return bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
 
 
 class GitBase:
@@ -78,8 +79,8 @@ class Git(GitBase):
         #     git.switch = switch
 
         git.credential_mode = git('config --get credential.helper').decode('utf-8').splitlines()[0]
-        git('config credential.helper store')
-        git.root = bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
+        git('config --replace-all credential.helper store')
+        git.root = get_root()
         git.url = url
 
         if username:

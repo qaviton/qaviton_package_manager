@@ -1,24 +1,26 @@
 import os
 import json
+import socket
 import psutil
 from time import time
 from multiprocessing.connection import Listener, Client
-from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.functions import find_free_port
 from traceback import format_exc
 from qaviton_package_manager.conf import ignore_list
+from qaviton_package_manager.utils.git_wrapper import get_root
 
 
 class Cache:
     authkey = b'qaviton is cool'
-    git = Git()
-    file = git.root + os.sep + ignore_list[1]
-    errors = git.root + os.sep + ignore_list[2]
+    root = get_root()
+    file = root + os.sep + ignore_list[1]
+    errors = root + os.sep + ignore_list[2]
 
     def server(self, timeout, **kwargs):
         port = find_free_port()
         server_address = ('localhost', port)
         with Listener(server_address, authkey=self.authkey) as listener:
+            listener._listener._socket.settimeout(timeout)
             t = time()
             server_data = {
                 'key': self.authkey.decode('utf-8'),
@@ -36,7 +38,10 @@ class Cache:
                         server_data['time'] = t
                         with open(self.file, 'w') as f:
                             json.dump(server_data, f)
-                conn = listener.accept()
+                try:
+                    conn = listener.accept()
+                except socket.timeout:
+                    break
                 try:
                     data: dict = conn.recv()
                     client_address = tuple(data['address'])
@@ -58,13 +63,13 @@ class Cache:
                 finally:
                     conn.close()
 
-    def client(self, method, **kwargs):
+    def client(self, timeout, method, **kwargs):
         assert method in ('get', 'delete')
         with open(self.file) as f:
             d = json.load(f)
 
-        key, server_address, t, timeout, pid = d['key'], tuple(d['address']), d['time'], d['timeout'], d['pid']
-        if time() > timeout != -1 and time() - t < 4 and psutil.pid_exists(pid):
+        key, server_address, t, server_timeout, pid = d['key'], tuple(d['address']), d['time'], d['timeout'], d['pid']
+        if time() > server_timeout != -1 and time() - t < 4 and psutil.pid_exists(pid):
             connections = [c for c in psutil.Process(pid).connections() if c.status == psutil.CONN_LISTEN]
             for c in connections:
                 if server_address[1] == c[3][1]:  # check process is listening to port
@@ -80,6 +85,7 @@ class Cache:
                             'kwargs': kwargs
                         })
                     with Listener(server_address, authkey=self.authkey) as listener:
+                        listener._listener._socket.settimeout(timeout)
                         conn = listener.accept()
                         data: dict = conn.recv()
                         if 'error' in data:
