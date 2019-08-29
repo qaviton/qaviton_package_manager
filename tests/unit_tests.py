@@ -21,4 +21,12 @@ def test_install():
     manager._get_external_args()
     manager.run()
 
-test_install()
+
+def test_uninstall():
+    from sys import argv
+    argv.append('--uninstall')
+    argv.append('cachetools')
+    manager._get_external_args()
+    manager.run()
+
+test_uninstall()

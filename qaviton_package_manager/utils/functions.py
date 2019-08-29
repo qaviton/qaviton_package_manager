@@ -1,5 +1,7 @@
 import os
 import shutil
+import socket
+from contextlib import closing
 from qaviton_package_manager.conf import REQUIREMENTS
 from qaviton_package_manager.utils.pip_wrapper import pip
 from qaviton_package_manager.utils.system import python
@@ -74,3 +76,10 @@ def upload_to_pypi(username, password):
 
 def get_package_name():
     return python('-c "from setup import package_name;print(package_name)"').decode('utf-8').splitlines()[0]
+
+
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]

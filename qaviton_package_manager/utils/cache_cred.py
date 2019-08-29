@@ -1,25 +1,90 @@
-import time
-import datetime
-
-from cachetools import cached, TTLCache  # 1 - let's import the "cached" decorator and the "TTLCache" object from cachetools
-cache = TTLCache(maxsize=100, ttl=300)  # 2 - let's create the cache object.
-
-@cached(cache)  # 3 - it's time to decorate the method to use our cache system!
-def get_candy_price(candy_id):
-    # let's use a sleep to simulate the time your function spends trying to connect to
-    # the web service, 5 seconds will be enough.
-    time.sleep(5)
-
-    # let's pretend that the price returned by the web service is $1 for candies with a
-    # odd candy_id and $1,5 for candies with a even candy_id
-
-    price = 1.5 if candy_id % 2 == 0 else 1
-
-    return (datetime.datetime.now().strftime("%c"), price)
+import os
+import json
+import psutil
+from time import time
+from multiprocessing.connection import Listener, Client
+from qaviton_package_manager.utils.git_wrapper import Git
+from qaviton_package_manager.utils.functions import find_free_port
+from traceback import format_exc
+from qaviton_package_manager.conf import ignore_list
 
 
-# now, let's simulate 20 customers in your show.
-# They are asking for candy with id 2 and candy with id 3...
-for i in range(0,20):
-    print(get_candy_price(2))
-    print(get_candy_price(3))
+class Cache:
+    authkey = b'qaviton is cool'
+    git = Git()
+    file = git.root + os.sep + ignore_list[1]
+    errors = git.root + os.sep + ignore_list[2]
+
+    def server(self, timeout, **kwargs):
+        port = find_free_port()
+        server_address = ('localhost', port)
+        with Listener(server_address, authkey=self.authkey) as listener:
+            t = time()
+            server_data = {
+                'key': self.authkey.decode('utf-8'),
+                'address': list(server_address),
+                'time': t,
+                'timeout': timeout,
+                'pid': os.getpid()
+            }
+            with open(self.file, 'w') as f:
+                json.dump(server_data, f)
+            while True:
+                if timeout > time() or timeout == -1:
+                    if time() > t + 1:
+                        t = time()
+                        server_data['time'] = t
+                        with open(self.file, 'w') as f:
+                            json.dump(server_data, f)
+                conn = listener.accept()
+                try:
+                    data: dict = conn.recv()
+                    client_address = tuple(data['address'])
+                    token = data['token'].encode('utf-8')
+                    if data['method'] == 'get':
+                        with Client(client_address, authkey=token) as conn:
+                            try:
+                                conn.send({key: kwargs[key] for key in data['kwargs']})
+                            except:
+                                conn.send({'error': format_exc()})
+                    if data['method'] == 'delete'\
+                    or time() > timeout+5 != -1:
+                        break
+                except:
+                    if not os.path.exists(self.errors):
+                        open(self.errors, 'w').close()
+                    with open(self.errors, 'a') as f:
+                        f.write('\n\n'+format_exc())
+                finally:
+                    conn.close()
+
+    def client(self, method, **kwargs):
+        assert method in ('get', 'delete')
+        with open(self.file) as f:
+            data = json.load(f)
+
+        key: str = data['key']
+        server_address = tuple(data['address'])
+        t: int = data['time']
+        timeout: int = data['timeout']
+        pid: int = data['pid']
+
+        if time() > timeout != -1 and time() - t < 4 and psutil.pid_exists(pid):
+            connections = [c for c in psutil.Process(pid).connections() if c.status == psutil.CONN_LISTEN]
+            for c in connections:
+                if server_address[1] == c[3][1]:  # check process is listening to port
+
+                    client_port = find_free_port()
+                    client_address = ('localhost', client_port)
+
+                    conn = Client(server_address, authkey=key.encode('utf-8'))
+                    conn.send({
+                        'token': self.authkey.decode('utf-8'),
+                        'address': list(client_address),
+                        'method': method
+                    })
+                    # can also send arbitrary objects:
+                    # conn.send(['a', 2.5, None, int, sum])
+                    conn.close()
+                    return
+        raise ConnectionAbortedError("the cache server is down")

@@ -2,6 +2,7 @@ import os
 from qaviton_package_manager.utils.system import run, bs
 from qaviton_package_manager.utils.logger import log
 from qaviton_package_manager.utils.functions import escape
+from qaviton_package_manager.utils.functions import try_to
 
 
 def git(*args): return run('git', *args)
@@ -107,9 +108,9 @@ class Git(GitBase):
         #         break
 
     def __del__(git):
-        git(f'config --unset credential.helper store')
+        try_to(git(f'config --unset credential.helper store'))
         if git.password:
-            git(f'config --unset user.password "{escape(git.password)}"')
+            try_to(git(f'config --unset user.password "{escape(git.password)}"'))
 
     # def _https_handler(git):
     #     protocol = 'https://'

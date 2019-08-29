@@ -20,6 +20,7 @@ from qaviton_package_manager.utils.logger import log
 from qaviton_package_manager.utils.functions import escape
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods import Prep
+from qaviton_package_manager.conf import ignore_list
 
 
 class HTTP:
@@ -220,8 +221,8 @@ Manager(
             log.warning("missing .gitignore file")
             print('creating .gitignore file')
             with open(self.git_ignore, 'w') as f:
-                f.write('package.py\n')
+                f.write('\n'.join(ignore_list))
         else:
             with open(self.git_ignore, 'a') as f:
-                f.write('\npackage.py\n')
-        log.info('added package.py to .gitignore file')
+                f.write('\n'+'\n'.join(ignore_list))
+        log.info('added files to .gitignore file')

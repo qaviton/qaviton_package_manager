@@ -25,3 +25,9 @@ supported_protocols = (
     'git+git://',
     'git+file:///',
 )
+
+ignore_list = [
+    'package.py',
+    '.qaviton_package_manager_cache',
+    '.qaviton_package_manager_cache.errors',
+]
