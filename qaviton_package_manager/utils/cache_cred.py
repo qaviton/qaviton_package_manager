@@ -61,14 +61,9 @@ class Cache:
     def client(self, method, **kwargs):
         assert method in ('get', 'delete')
         with open(self.file) as f:
-            data = json.load(f)
+            d = json.load(f)
 
-        key: str = data['key']
-        server_address = tuple(data['address'])
-        t: int = data['time']
-        timeout: int = data['timeout']
-        pid: int = data['pid']
-
+        key, server_address, t, timeout, pid = d['key'], tuple(d['address']), d['time'], d['timeout'], d['pid']
         if time() > timeout != -1 and time() - t < 4 and psutil.pid_exists(pid):
             connections = [c for c in psutil.Process(pid).connections() if c.status == psutil.CONN_LISTEN]
             for c in connections:
@@ -77,14 +72,17 @@ class Cache:
                     client_port = find_free_port()
                     client_address = ('localhost', client_port)
 
-                    conn = Client(server_address, authkey=key.encode('utf-8'))
-                    conn.send({
-                        'token': self.authkey.decode('utf-8'),
-                        'address': list(client_address),
-                        'method': method
-                    })
-                    # can also send arbitrary objects:
-                    # conn.send(['a', 2.5, None, int, sum])
-                    conn.close()
-                    return
+                    with Client(server_address, authkey=key.encode('utf-8')) as conn:
+                        conn.send({
+                            'token': self.authkey.decode('utf-8'),
+                            'address': list(client_address),
+                            'method': method,
+                            'kwargs': kwargs
+                        })
+                    with Listener(server_address, authkey=self.authkey) as listener:
+                        conn = listener.accept()
+                        data: dict = conn.recv()
+                        if 'error' in data:
+                            raise ConnectionError(data['error'])
+                    return data
         raise ConnectionAbortedError("the cache server is down")
