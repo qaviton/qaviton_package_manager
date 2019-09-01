@@ -13,6 +13,7 @@
 
 
 from qaviton_package_manager.manager_methods.clean_requirements import Clean
+from qaviton_package_manager.utils.functions import package_match
 
 
 class Remove(Clean):
@@ -20,19 +21,11 @@ class Remove(Clean):
         Clean.run(self)
         if self.packages:
             with open(self.requirements_path) as f:
-                packages = f.readlines()
-            for i, package in enumerate(packages):
-                package = package.replace(' ', '').replace('\n', '')
+                requirements = f.readlines()
+            for i, line in enumerate(requirements):
+                requirement = line.replace(' ', '').replace('\n', '')
                 for removed in self.packages:
-                    removed = removed.replace(' ', '')
-                    # https://www.python.org/dev/peps/pep-0440/#version-specifiers
-                    if removed == package\
-                    or package.startswith(removed+'=')\
-                    or package.startswith(removed + '>')\
-                    or package.startswith(removed + '<')\
-                    or package.startswith(removed + '~')\
-                    or package.startswith(removed + '!'):
-                        packages[i] = None
-            packages = [pkg for pkg in packages if pkg is not None]
+                    if package_match(removed.replace(' ', ''), requirement):
+                        requirements[i] = None
             with open(self.requirements_path, 'w') as f:
-                f.writelines(packages)
+                f.writelines([pkg for pkg in requirements if pkg is not None])

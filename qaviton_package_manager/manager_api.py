@@ -22,6 +22,7 @@ from qaviton_package_manager.manager_methods.clean_requirements import Clean
 from qaviton_package_manager.manager_methods.distribute_to_git import Build
 from qaviton_package_manager.manager_methods.distribute_to_pypi import Upload
 from qaviton_package_manager.utils.cache_cred import Cache
+from qaviton_package_manager.utils.system import run
 
 
 class Manager:
@@ -30,14 +31,16 @@ class Manager:
             url=None,
             username=None,
             password=None,
+            email=None,
             pypi_user=None,
             pypi_pass=None,
-            cache_timeout=60*60*24*356,
+            cache_timeout=-1,
             **kwargs):
         self.vars = {
             'url': url,
             'username': username,
             'password': password,
+            'email': email,
             'pypi_user': pypi_user,
             'pypi_pass': pypi_pass,
             'cache_timeout': cache_timeout,
@@ -46,10 +49,31 @@ class Manager:
         self._set_kwargs(kwargs)
         self._ord = list(kwargs.keys())
         self._get_external_args()
-        self.git = Git(self.vars['url'], self.vars['username'], self.vars['password'])
-        cache = Cache()
-        if not cache.server_is_alive():
-            cache.create_server(**self.vars)
+        self.git = Git(
+            url=self.vars['url'],
+            username=self.vars['username'],
+            password=self.vars['password'],
+            email=self.vars['email'],
+        )
+        self.cache = Cache()
+        if not self.cache.server_is_alive():
+            self.cache.create_server(**self.vars)
+        self.git_cache_sync()
+
+    def git_cache_sync(self):
+        credentials = {
+            'url': self.git.url,
+            'username': self.git.username,
+            'password': self.git.password,
+            'email': self.git.email,
+        }
+        for key, value in credentials.items():
+            if not value:
+                response = self.cache.get(key)
+                if key in response:
+                    self.git[key] = response[key]
+            else:
+                self.cache.post(**{key: value})
 
     def _set_kwargs(self, kwargs):
         for key, value in kwargs.items():

@@ -27,6 +27,13 @@ def try_to(f, *args, **kwargs):
         return e
 
 
+def try_or_none(f, *args, **kwargs):
+    try:
+        return f(*args, **kwargs)
+    except:
+        return
+
+
 def clean_distibution():
     shutil.rmtree('build')
     shutil.rmtree('dist')
@@ -51,3 +58,14 @@ def find_free_port():
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+
+
+def package_match(package, requirement):
+    """https://www.python.org/dev/peps/pep-0440/#version-specifiers"""
+    if package == requirement \
+    or requirement.startswith(package + '=') \
+    or requirement.startswith(package + '>') \
+    or requirement.startswith(package + '<') \
+    or requirement.startswith(package + '~') \
+    or requirement.startswith(package + '!'):
+        return True

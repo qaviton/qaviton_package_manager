@@ -21,6 +21,8 @@ class Cache:
     root = get_root()
     file = root + os.sep + ignore_list[1]
     errors = root + os.sep + ignore_list[2]
+    request_timeout = 30
+
     class method:
         get = 'GET'
         delete = 'DELETE'
@@ -50,67 +52,93 @@ class Cache:
                 raise TimeoutError("timed out while waiting for server details")
             sleep(0.1)
 
-    def server_is_alive(self, timeout=5):
+    def server_is_alive(self):
         if not self.is_file():
             return False
         try:
-            self.client(timeout, self.method.get)
+            self.get()
             return True
         except ServerDownError:
             return False
 
-    def server(self, cache_timeout, **kwargs):
-        timeout = cache_timeout
-        port = find_free_port()
-        server_address = ('localhost', port)
-        with Listener(server_address, authkey=self.authkey) as listener:
-            listener._listener._socket.settimeout(timeout if timeout < 60*60*24 else 60*60*24)  # avoid OverflowError: timeout doesn't fit into C timeval
-            pid = os.getpid()
-            p = psutil.Process(pid)
-            with open(self.file, 'w') as f:
-                json.dump({
-                    'key': self.authkey.decode('utf-8'),
-                    'address': list(server_address),
-                    'timeout': timeout,
-                    'pid': pid,
-                    'name': p.name(),
-                    'created': p.create_time()
-                }, f, indent=2)
-            del pid
-            del p
-            while True:
-                try:
-                    conn = listener.accept()
-                except socket.timeout:
-                    break
-                try:
-                    data: dict = conn.recv()
-                    client_address = tuple(data['address'])
-                    token = data['token'].encode('utf-8')
-                    if data['method'] == self.method.get:
-                        with Client(client_address, authkey=token) as conn:
-                            try:
-                                conn.send({key: kwargs[key] for key in data['kwargs']})
-                            except:
-                                conn.send({'error': format_exc()})
-                    elif data['method'] == self.method.post:
-                        kwargs.update(data['kwargs'])
-                    elif data['method'] == self.method.delete:
-                        break
-                    else:
-                        conn.send({'error': 'unsupported method'})
-                except:
-                    if not os.path.exists(self.errors):
-                        open(self.errors, 'w').close()
-                    with open(self.errors, 'a') as f:
-                        f.write('\n\n'+format_exc())
-                finally:
-                    conn.close()
-                if time() > timeout + 5 != -1:
-                    break
+    def log_server_error(self):
+        if not os.path.exists(self.errors):
+            open(self.errors, 'w').close()
+        with open(self.errors, 'a') as f:
+            f.write('\n\n' + format_exc())
 
-    def client(self, timeout, method, **kwargs):
-        self.wait_for_file(timeout)
+    def server(self, cache_timeout, **kwargs):
+        try:
+            def send_response(response: dict):
+                with Client(client_address, authkey=token) as conn:
+                    try:
+                        conn.send(response)
+                    except:
+                        conn.send({'error': format_exc()})
+
+            timeout = cache_timeout
+            port = find_free_port()
+            server_address = ('localhost', port)
+            with Listener(server_address, authkey=self.authkey) as listener:
+                if timeout != -1:
+                    listener._listener._socket.settimeout(timeout if timeout < 60*60*24 else 60*60*24)  # avoid OverflowError: timeout doesn't fit into C timeval
+                pid = os.getpid()
+                p = psutil.Process(pid)
+                with open(self.file, 'w') as f:
+                    json.dump({
+                        'key': self.authkey.decode('utf-8'),
+                        'address': list(server_address),
+                        'timeout': timeout,
+                        'pid': pid,
+                        'name': p.name(),
+                        'created': p.create_time()
+                    }, f, indent=2)
+                del pid
+                del p
+                while True:
+                    try:
+                        conn = listener.accept()
+                    except socket.timeout:
+                        break
+                    try:
+                        data: dict = conn.recv()
+                        client_address = tuple(data['address'])
+                        token = data['token'].encode('utf-8')
+
+                        if data['method'] == self.method.get:
+                            send_response({key: kwargs[key] for key in data['kwargs'] if key in kwargs})
+
+                        elif data['method'] == self.method.post:
+                            kwargs.update(data['kwargs'])
+                            send_response({})
+
+                        elif data['method'] == self.method.delete:
+                            send_response({})
+                            break
+
+                        else:
+                            send_response({'error': 'unsupported method'})
+                    except:
+                        self.log_server_error()
+                    finally:
+                        conn.close()
+                    if time() > timeout + 5 and timeout != -1:
+                        break
+        except:
+            self.log_server_error()
+
+    def create_server(self, cache_timeout, **kwargs):
+        self.remove_file()
+        p = pythonCIO(
+            'from qaviton_package_manager.utils.cache_cred import Cache',
+            'cache = Cache()',
+            f'cache.server({cache_timeout}, **{kwargs})'
+        )
+        self.wait_for_file(timeout=10)
+        return p
+
+    def request(self, method, **kwargs)->dict:
+        self.wait_for_file(self.request_timeout)
         d = self.get_file_content()
         server_key = d['key']
         server_address = tuple(d['address'])
@@ -119,7 +147,7 @@ class Cache:
         server_name = d['name']
         server_created = d['created']
 
-        if time() > server_timeout != -1 and psutil.pid_exists(server_pid):
+        if (time() > server_timeout or server_timeout == -1) and psutil.pid_exists(server_pid):
             server_process = psutil.Process(server_pid)
             connections = [c for c in server_process.connections() if c.status == psutil.CONN_LISTEN]
             for c in connections:
@@ -136,7 +164,7 @@ class Cache:
                             'kwargs': kwargs
                         })
                     with Listener(client_address, authkey=self.authkey) as listener:
-                        listener._listener._socket.settimeout(timeout)
+                        listener._listener._socket.settimeout(self.request_timeout)
                         conn = listener.accept()
                         data: dict = conn.recv()
                         if 'error' in data:
@@ -144,12 +172,7 @@ class Cache:
                     return data
         raise ServerDownError("the cache server is down")
 
-    def create_server(self, cache_timeout, **kwargs):
-        self.remove_file()
-        p = pythonCIO(
-            'from qaviton_package_manager.utils.cache_cred import Cache',
-            'cache = Cache()',
-            f'cache.server({cache_timeout}, **{kwargs})'
-        )
-        self.wait_for_file(timeout=10)
-        return p
+    def get(self, *args) -> dict: return self.request(self.method.get, **{key: True for key in args})
+    def post(self, **kwargs) -> dict: return self.request(self.method.post, **kwargs)
+    def delete(self) -> dict: return self.request(self.method.delete)
+

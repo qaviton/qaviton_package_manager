@@ -1,7 +1,7 @@
 import time
 from urllib.parse import quote_plus as urlencode
 from qaviton_package_manager.utils.pip_wrapper import pip
-from qaviton_package_manager.utils.git_wrapper import git
+from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.cache_cred import Cache
 from package import manager
 
@@ -33,18 +33,6 @@ def test_uninstall():
     manager.run()
 
 
-# def test_cache():
-#     timeout = 30
-#     cache = Cache()
-#     cache.remove_file()
-#     server_cached_data = {'username': 'pinki'}
-#     p = multiprocessing.Process(target=cache.server, args=(timeout,), kwargs=server_cached_data)
-#     p.start()
-#     response = cache.client(timeout, cache.method.get, username=True)
-#     assert response == server_cached_data
-#     p.join(timeout=timeout)
-
-
 def test_cache():
     server_cached_data = {
         'username': 'pinki',
@@ -56,9 +44,21 @@ def test_cache():
         cache.kill_server()
 
     p = cache.create_server(cache_timeout, **server_cached_data)
-    response = cache.client(cache_timeout, cache.method.get, username=True, password=True)
+    response = cache.get(*server_cached_data.keys())
     assert response == server_cached_data
     created = cache.get_file_content()['created']
     while p.poll() is None:
         time.sleep(0.3)
-        if time.time() - created
+        assert time.time() - created < cache_timeout + 5
+    assert p.returncode == 0
+    if cache.server_is_alive():
+        cache.kill_server()
+
+
+def test_git():
+    git = Git()
+    assert git.url == manager.git.url
+    assert git.username == manager.git.username
+    assert git.password == manager.git.password
+    assert git.email == manager.git.email
+
