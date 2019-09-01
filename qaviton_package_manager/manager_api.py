@@ -27,15 +27,16 @@ from qaviton_package_manager.utils.system import run
 
 class Manager:
     def __init__(
-            self,
-            url=None,
-            username=None,
-            password=None,
-            email=None,
-            pypi_user=None,
-            pypi_pass=None,
-            cache_timeout=-1,
-            **kwargs):
+        self,
+        url=None,
+        username=None,
+        password=None,
+        email=None,
+        pypi_user=None,
+        pypi_pass=None,
+        cache_timeout=-1,
+        **kwargs,
+    ):
         self.vars = {
             'url': url,
             'username': username,
@@ -106,11 +107,20 @@ class Manager:
                         self._ord.append(api)
                 i += 1
 
-    def run(self, **kwargs):
+    def _run(self, f, *args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except SyntaxError as e:
+            raise e
+        except Exception as e:
+            print(e)
+            exit(code=1)
+
+    def run(self, *functions, **kwargs):
+        for f in functions: self._run(f)
         self._set_kwargs(kwargs)
         self._ord.extend(kwargs.keys())
-        for key in self._ord:
-            getattr(self, key)(*self.kwargs[key])
+        for key in self._ord: self._run(getattr(self, key), *self.kwargs[key])
 
     def create(self, package_name=None): Create(self.git, package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self

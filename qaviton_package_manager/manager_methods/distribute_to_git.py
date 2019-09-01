@@ -27,9 +27,9 @@ class Build(Prep):
         version = self.update_version(version)
         branch = f'{to_branch.rsplit("/", 1)[0]}/{version}'
         msg = f'build candidate {branch}'
+        git.commit(msg)
         git.fetch()
         git.pull()
-        git.commit(msg)
 
         local_branches = git.get_local_branches()
         # remote_branches = [branch.split(b'/', 1)[1] for branch in git.get_remote_branches()]

@@ -175,4 +175,3 @@ class Cache:
     def get(self, *args) -> dict: return self.request(self.method.get, **{key: True for key in args})
     def post(self, **kwargs) -> dict: return self.request(self.method.post, **kwargs)
     def delete(self) -> dict: return self.request(self.method.delete)
-
