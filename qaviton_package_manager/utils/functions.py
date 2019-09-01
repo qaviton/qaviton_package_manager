@@ -35,8 +35,9 @@ def try_or_none(f, *args, **kwargs):
 
 
 def clean_distibution():
-    shutil.rmtree('build')
-    shutil.rmtree('dist')
+    if os.path.exists('build'): shutil.rmtree('build')
+    if os.path.exists('dist'): shutil.rmtree('dist')
+
 
 def create_distibution_packages():
     clean_distibution()

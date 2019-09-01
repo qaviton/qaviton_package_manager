@@ -13,6 +13,7 @@
 
 
 from sys import argv
+from traceback import format_exc
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods.create_manager import Create
 from qaviton_package_manager.manager_methods.install_requirements import Install
@@ -112,8 +113,8 @@ class Manager:
             return f(*args, **kwargs)
         except SyntaxError as e:
             raise e
-        except Exception as e:
-            print(e)
+        except:
+            print(format_exc())
             exit(code=1)
 
     def run(self, *functions, **kwargs):
