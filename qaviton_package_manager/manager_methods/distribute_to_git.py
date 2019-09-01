@@ -27,8 +27,8 @@ class Build(Prep):
         version = self.update_version(version)
         branch = f'{to_branch.rsplit("/", 1)[0]}/{version}'
         msg = f'build candidate {branch}'
-        try_to(git.stash)
         try_to(git.commit, msg)
+        try_to(git.stash)
         git.fetch()
         try_to(git.pull)
 
