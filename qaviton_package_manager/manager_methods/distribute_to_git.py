@@ -27,10 +27,10 @@ class Build(Prep):
         version = self.update_version(version)
         branch = f'{to_branch.rsplit("/", 1)[0]}/{version}'
         msg = f'build candidate {branch}'
-        try_to(git.commit, msg)
+        git.commit(msg)
         try_to(git.stash)
         git.fetch()
-        try_to(git.pull)
+        git.pull()
 
         local_branches = git.get_local_branches()
         # remote_branches = [branch.split(b'/', 1)[1] for branch in git.get_remote_branches()]
@@ -52,12 +52,12 @@ class Build(Prep):
         req = f'git+{git.url}@{branch}'
         latest = f'git+{git.url}@{to_branch}'
         print('you can now install this package:')
-        print('  1) go to another project with git (make sure you have permissions)')
-        print('  2) python -m venv venv (recommended)')
-        print('  3) pip install qaviton_package_manager')
-        print(f'  4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(req)}"')
+        print('   1) go to another project with git (make sure you have permissions)')
+        print('   2) python -m venv venv (recommended)')
+        print('   3) pip install qaviton_package_manager')
+        print(f'   4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(req)}"')
         print("or if you want the latest version:")
-        print(f'  4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(latest)}"')
+        print(f'   4) python -m qaviton_package_manager --url "url"" --username "usr" --password "pass" --create --install "{escape(latest)}"')
         try_to(git, f'checkout -f {current_branch}')
 
     def update_version(self, version):

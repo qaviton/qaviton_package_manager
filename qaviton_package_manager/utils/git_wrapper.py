@@ -242,8 +242,10 @@ class Git(GitBase):
                 branch = branch[2:]
                 branches[i] = branch
         return branches
-
-    def commit(git, msg): git(f'commit -m "{escape(msg)}"')
+    def commit(git, msg):
+        if git('diff'):
+            git(f'commit -m "{escape(msg)}"')
+        return git
     def stash(git): git('stash'); return git
     def fetch(git, *args): git('fetch', *args); return git
     def pull(git, *args): git('pull --rebase', *args); return git
