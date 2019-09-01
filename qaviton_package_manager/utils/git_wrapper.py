@@ -244,7 +244,7 @@ class Git(GitBase):
         return branches
     def commit(git, msg):
         if git('diff'):
-            git(f'commit -m "{escape(msg)}"')
+            git(f'commit -a -m "{escape(msg)}"')
         return git
     def stash(git): git('stash'); return git
     def fetch(git, *args): git('fetch', *args); return git
