@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from qaviton_package_manager.manager_api import Manager
+from qaviton_package_manager.manager import Manager
 
 
 if __name__ == '__main__':

@@ -13,11 +13,11 @@
 
 
 __author__ = 'Qaviton'
-__version__ = "2019.9.1.21.12.2.127916"
+__version__ = "2019.9.1.21.17.28.385885"
 __author_email__ = 'info@qaviton.com'
 __description__ = 'a package manager for projects with private repositories'
 __url__ = 'https://github.com/qaviton/qaviton_package_manager'
 __license__ = 'apache-2.0'
 
 
-from qaviton_package_manager.manager_api import Manager
+from qaviton_package_manager.manager import Manager
