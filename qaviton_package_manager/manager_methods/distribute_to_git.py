@@ -27,10 +27,9 @@ class Build(Prep):
         version = self.update_version(version)
         branch = f'{to_branch.rsplit("/", 1)[0]}/{version}'
         msg = f'build candidate {branch}'
-        git.commit(msg)
-        try_to(git.stash)
         git.fetch()
         git.pull()
+        git.commit(msg)
 
         local_branches = git.get_local_branches()
         # remote_branches = [branch.split(b'/', 1)[1] for branch in git.get_remote_branches()]
@@ -39,16 +38,13 @@ class Build(Prep):
             git.create_branch(to_branch).create_remote()
         elif to_branch != current_branch:
             git.checkout(to_branch)
-            try_to(git.stash)
             git.pull()
             git(f'rebase {current_branch}')
 
         git.tag(f'{branch}', msg)
         git.push(git.url, to_branch)
 
-        git.switch(branch)
-        git.create_remote()
-        # git.push(git.url, branch)
+        git.switch(branch).create_remote()
         req = f'git+{git.url}@{branch}'
         latest = f'git+{git.url}@{to_branch}'
         print('you can now install this package:')
