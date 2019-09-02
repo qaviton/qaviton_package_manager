@@ -68,7 +68,8 @@ class Create(Prep):
             raise FileExistsError("setup.py already exist")
 
         self.git_ignore = self.root + os.sep + '.gitignore'
-        self.pkg = self.root + os.sep + 'package.py'
+        self.pkg = self.root + os.sep + 'package'
+        self.mng = self.pkg + os.sep + 'manage.py'
         self.run()
 
     def run(self):
@@ -196,9 +197,10 @@ class Create(Prep):
 
     def create_package_file(self):
         if os.path.exists(self.pkg):
-            raise FileExistsError("package.py already exist and may be used for other functionality")
+            raise FileExistsError("package directory already exist and may be used for other functionality")
         else:
-            with open(self.pkg, 'w') as f:
+            os.mkdir(self.pkg)
+            with open(self.mng, 'w') as f:
                 f.write(f'''from qaviton_package_manager import Manager
 
 # this approach might not be safe enough

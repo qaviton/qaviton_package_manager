@@ -106,4 +106,4 @@ venv.bak/
 # private
 *private*
 
-package.py
+package/cred*
