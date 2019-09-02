@@ -13,8 +13,8 @@ def test_pip_install(username="", password=""):
     pip.uninstall('qaviton_package_manager')
 
 
-def test_create_setup():
-    manager.create('my_test_manager')
+# def test_create_setup():
+#     manager.create('my_test_manager')
 
 
 def test_install():
@@ -33,26 +33,41 @@ def test_uninstall():
     manager.run()
 
 
+# def test_cache():
+#     server_cached_data = {
+#         'username': 'pinki',
+#         'password': 'pokol',
+#     }
+#     cache_timeout = 30
+#     cache = Cache()
+#     if cache.server_is_alive():
+#         cache.kill_server()
+#
+#     p = cache.create_server(cache_timeout, **server_cached_data)
+#     response = cache.get(*server_cached_data.keys())
+#     assert response == server_cached_data
+#     created = cache.get_file_content()['created']
+#     while p.poll() is None:
+#         time.sleep(0.3)
+#         assert time.time() - created < cache_timeout + 5
+#     assert p.returncode == 0
+#     if cache.server_is_alive():
+#         cache.kill_server()
 def test_cache():
     server_cached_data = {
-        'username': 'pinki',
-        'password': 'pokol',
+        'dooki': 'pinki',
+        'pooki': 'pokol',
     }
-    cache_timeout = 30
     cache = Cache()
-    if cache.server_is_alive():
-        cache.kill_server()
 
-    p = cache.create_server(cache_timeout, **server_cached_data)
+    response = cache.post(**server_cached_data)
+    assert response == {}
+
     response = cache.get(*server_cached_data.keys())
     assert response == server_cached_data
-    created = cache.get_file_content()['created']
-    while p.poll() is None:
-        time.sleep(0.3)
-        assert time.time() - created < cache_timeout + 5
-    assert p.returncode == 0
-    if cache.server_is_alive():
-        cache.kill_server()
+
+    response = cache.delete(*server_cached_data.keys())
+    assert response == {}
 
 
 def test_git():
@@ -61,4 +76,3 @@ def test_git():
     assert git.username == manager.git.username
     assert git.password == manager.git.password
     assert git.email == manager.git.email
-

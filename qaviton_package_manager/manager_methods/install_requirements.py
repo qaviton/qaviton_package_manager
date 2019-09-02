@@ -13,7 +13,7 @@
 
 
 from qaviton_package_manager.utils.pip_wrapper import pip
-from qaviton_package_manager.manager_methods import ManagerOperation
+from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
 from qaviton_package_manager.utils.functions import package_match
 
 
@@ -46,4 +46,8 @@ class Install(ManagerOperation):
                     if package_match(package.replace(' ', ''), requirement):
                         requirements[i] = None
             with open(self.requirements_path, 'w') as f:
-                f.writelines([pkg for pkg in requirements if pkg is not None] + self.packages)
+                f.writelines([pkg for pkg in requirements if pkg is not None] + list(self.packages))
+
+
+class InstallTest(TestOperation, Install):
+    def run(self): return Install.run(self)

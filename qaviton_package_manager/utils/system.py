@@ -1,4 +1,4 @@
-from subprocess import run as run_block, Popen, PIPE
+from subprocess import run as run_block, Popen, PIPE, CalledProcessError
 from sys import executable
 
 
@@ -34,9 +34,18 @@ def escape(string):
     return "".join(s)
 
 
+def bs(value: bytes):
+    """bytes to string converter"""
+    return str(value)[2:-1]
+
+
 def run(*args) -> bytes:
     command = ' '.join(args)
-    r = run_block(command, shell=True, stdout=PIPE, check=True)
+    try:
+        r = run_block(command, shell=True, stdout=PIPE, check=True)
+    except CalledProcessError as e: raise OSError(
+        f'{command} failed\n'
+        f'{e.stderr}, Exit Code: {e.returncode}\n')
     if r.stderr: raise OSError(
         f'{command} failed\n'
         f'{r.stderr}, Exit Code: {r.returncode}\n')
@@ -67,8 +76,5 @@ def pythonCIO(*args):
     return runIO(executable, '-c', f'"{escape(";".join(args))}"')
 
 
-def bs(value: bytes):
-    """bytes to string converter"""
-    return str(value)[2:-1]
-
-
+def pytest(*args):
+    return run(executable, '-m', 'pytest', *args)

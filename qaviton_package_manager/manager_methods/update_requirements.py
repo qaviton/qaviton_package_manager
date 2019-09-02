@@ -13,12 +13,17 @@
 
 
 from qaviton_package_manager.utils.pip_wrapper import pip
-from qaviton_package_manager.manager_methods import ManagerOperation
+from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
 
 
 class Update(ManagerOperation):
     def run(self):
         if len(self.packages) == 0 or self.packages[0] is None:
             self.get_packages_from_requirements()
+        packages = self.configure_packages()
+        if packages:
+            pip.install(*packages, '--upgrade')
 
-        pip.install(*self.configure_packages(), '--upgrade')
+
+class UpdateTest(TestOperation, Update):
+    def run(self): return Update.run(self)

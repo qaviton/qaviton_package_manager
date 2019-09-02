@@ -16,14 +16,14 @@ from sys import argv
 from traceback import format_exc
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods.create_manager import Create
-from qaviton_package_manager.manager_methods.install_requirements import Install
-from qaviton_package_manager.manager_methods.update_requirements import Update
-from qaviton_package_manager.manager_methods.remove_requirements import Remove
-from qaviton_package_manager.manager_methods.clean_requirements import Clean
+from qaviton_package_manager.manager_methods.install_requirements import Install, InstallTest
+from qaviton_package_manager.manager_methods.update_requirements import Update, UpdateTest
+from qaviton_package_manager.manager_methods.remove_requirements import Remove, RemoveTest
+from qaviton_package_manager.manager_methods.clean_requirements import Clean, CleanTest
 from qaviton_package_manager.manager_methods.distribute_to_git import Build
 from qaviton_package_manager.manager_methods.distribute_to_pypi import Upload
+from qaviton_package_manager.manager_methods.test_package import Test
 from qaviton_package_manager.utils.cache_cred import Cache
-from qaviton_package_manager.utils.system import run
 
 
 class Manager:
@@ -61,6 +61,7 @@ class Manager:
         if not self.cache.server_is_alive():
             self.cache.create_server(**self.vars)
         self.git_cache_sync()
+        self.test = Test()
 
     def git_cache_sync(self):
         credentials = {
@@ -125,9 +126,12 @@ class Manager:
 
     def create(self, package_name=None): Create(self.git, package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self
+    def install_test(self, *packages): InstallTest(self.git, *packages); return self
     def update(self, *packages): Update(self.git, *packages); return self
+    def update_test(self, *packages): UpdateTest(self.git, *packages); return self
     def clean(self, *packages): Clean(self.git, *packages); return self
+    def clean_test(self, *packages): CleanTest(self.git, *packages); return self
     def uninstall(self, *packages): Remove(self.git, *packages); return self
-    def test(self, *test_commands): run(*test_commands); return self
+    def uninstall_test(self, *packages): RemoveTest(self.git, *packages); return self
     def build(self, to_branch='build/latest', version=None): Build(self.git, to_branch=to_branch, version=version); return self
     def upload(self): Upload(self.vars['pypi_user'], self.vars['pypi_pass']); return self

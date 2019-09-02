@@ -114,8 +114,11 @@ class Cache:
 
                         elif data['method'] == self.method.delete:
                             send_response({})
-                            break
-
+                            if len(data['kwargs']) == 0:
+                                break
+                            for key in data['kwargs']:
+                                if key in kwargs:
+                                    del kwargs[key]
                         else:
                             send_response({'error': 'unsupported method'})
                     except:
@@ -174,4 +177,4 @@ class Cache:
 
     def get(self, *args) -> dict: return self.request(self.method.get, **{key: True for key in args})
     def post(self, **kwargs) -> dict: return self.request(self.method.post, **kwargs)
-    def delete(self) -> dict: return self.request(self.method.delete)
+    def delete(self, *args) -> dict: return self.request(self.method.delete, **{key: True for key in args})

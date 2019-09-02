@@ -11,7 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-
+from qaviton_package_manager.manager_methods import TestOperation
 from qaviton_package_manager.manager_methods.clean_requirements import Clean
 from qaviton_package_manager.utils.functions import package_match
 
@@ -29,3 +29,7 @@ class Remove(Clean):
                         requirements[i] = None
             with open(self.requirements_path, 'w') as f:
                 f.writelines([pkg for pkg in requirements if pkg is not None])
+
+
+class RemoveTest(TestOperation, Remove):
+    def run(self): return Clean.run(self)

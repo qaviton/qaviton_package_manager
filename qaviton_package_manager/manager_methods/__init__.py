@@ -14,9 +14,9 @@
 
 import os
 from abc import ABCMeta, abstractmethod
-from urllib.parse import quote_plus as urlencode
-from qaviton_package_manager.conf import supported_protocols
-from qaviton_package_manager.utils.functions import get_requirements
+# from urllib.parse import quote_plus as urlencode
+# from qaviton_package_manager.conf import supported_protocols
+from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.logger import log
 
@@ -47,6 +47,18 @@ class ManagerOperation(metaclass=ABCMeta):
 
     def get_packages_from_requirements(self):
         self.packages = get_packages(self.requirements_path)
+
+    @abstractmethod
+    def run(self):
+        pass
+
+
+class TestOperation(ManagerOperation, metaclass=ABCMeta):
+    def __init__(self, git: Git, *packages):
+        self.git = git
+        self.packages = packages
+        self.requirements_path = get_test_requirements(git.root)
+        self.run()
 
     @abstractmethod
     def run(self):

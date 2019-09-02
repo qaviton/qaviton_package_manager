@@ -15,6 +15,9 @@
 LICENSE = 'LICENSE'
 README = 'README.md'
 REQUIREMENTS = 'requirements.txt'
+REQUIREMENTS_TESTS = 'requirements-test.txt'
+TESTS_DIR = 'tests'
+
 
 # https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support
 supported_protocols = (

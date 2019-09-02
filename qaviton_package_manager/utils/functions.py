@@ -2,22 +2,44 @@ import os
 import shutil
 import socket
 from contextlib import closing
-from qaviton_package_manager.conf import REQUIREMENTS
+from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS, TESTS_DIR
 from qaviton_package_manager.utils.pip_wrapper import pip
 from qaviton_package_manager.utils.system import python
 
 
-def get_requirements(root):
-    requirements = root + os.sep + REQUIREMENTS
+def get_requirements(root): return root + os.sep + REQUIREMENTS
+def get_test_requirements(root): return root + os.sep + REQUIREMENTS_TESTS
+
+
+def set_requirements(root):
+    requirements = get_requirements(root)
     if not os.path.exists(requirements):
-        print(
-            f'{REQUIREMENTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.REQUIREMENTS = "filename"')
+        print(f'{REQUIREMENTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.REQUIREMENTS = "filename"')
         name = input(f'select REQUIREMENTS filename({REQUIREMENTS} default):')
         if not name: name = REQUIREMENTS
         requirements = root + os.sep + name
         if not os.path.exists(requirements):
             pip.freeze(requirements)
     return requirements
+
+
+def set_test_requirements(root):
+    path = root + os.sep + REQUIREMENTS_TESTS
+    if not os.path.exists(path):
+        print(f'{REQUIREMENTS_TESTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.REQUIREMENTS_TESTS = "filename"')
+        name = input(f'select REQUIREMENTS_TESTS filename({REQUIREMENTS_TESTS} default):')
+        if not name: name = REQUIREMENTS_TESTS
+        path = root + os.sep + name
+        if not os.path.exists(path):
+            with open(path) as f:
+                f.write('pytest')
+    path = root + os.sep + TESTS_DIR
+    if not os.path.exists(path):
+        print(f'{TESTS_DIR} not found\nP.S. you can change the default tests directory with qaviton_package_manager.conf.TESTS_DIR = "filename"')
+        name = input(f'select TESTS_DIR filename({TESTS_DIR} default):')
+        path = root + os.sep + name
+        if not os.path.exists(path):
+            os.mkdir(path)
 
 
 def try_to(f, *args, **kwargs):

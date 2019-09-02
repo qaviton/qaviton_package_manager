@@ -13,7 +13,7 @@
 
 
 from qaviton_package_manager.utils.pip_wrapper import pip
-from qaviton_package_manager.manager_methods import ManagerOperation
+from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
 
 
 class Clean(ManagerOperation):
@@ -22,3 +22,7 @@ class Clean(ManagerOperation):
             self.get_packages_from_requirements()
 
         pip.uninstall(*self.configure_packages())
+
+
+class CleanTest(TestOperation, Clean):
+    def run(self): return Clean.run(self)
