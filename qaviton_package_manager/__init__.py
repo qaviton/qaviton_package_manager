@@ -13,12 +13,15 @@
 
 
 __author__ = 'Qaviton'
-__version__ = "2019.9.2.16.24.8.404758"
+__version__ = "2019.9.2.16.36.9.514064"
 __author_email__ = 'info@qaviton.com'
-__description__ = 'a package manager for projects with private repositories'
+__description__ = 'a package manager for git projects with private repositories'
 __url__ = 'https://github.com/qaviton/qaviton_package_manager'
 __license__ = 'apache-2.0'
 
 
 from qaviton_package_manager.manager import Manager
 from qaviton_package_manager.utils.cryp import decypt, encrypt
+from qaviton_package_manager.utils.git_wrapper import Git, git
+from qaviton_package_manager.utils.pip_wrapper import pip
+from qaviton_package_manager.utils.system import escape, bs, run, runIO, python, pythonC, pythonCIO, pytest
