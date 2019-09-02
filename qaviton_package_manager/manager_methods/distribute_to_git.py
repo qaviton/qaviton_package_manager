@@ -28,7 +28,6 @@ class Build(Prep):
         branch = f'{to_branch.rsplit("/", 1)[0]}/{version}'
         msg = f'build candidate {branch}'
         git.commit(msg)
-        git.fetch()
         git.pull()
 
         local_branches = git.get_local_branches()

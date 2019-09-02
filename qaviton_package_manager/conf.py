@@ -34,7 +34,7 @@ cred_protocols = (
 )
 
 ignore_list = [
-    'package/',
+    'package.py',
     '.qaviton_package_manager_cache',
     '.qaviton_package_manager_cache.errors',
 ]

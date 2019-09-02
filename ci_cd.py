@@ -1,4 +1,4 @@
-from package.manage import manager
+from package import manager
 
 
 if __name__ == "__main__":

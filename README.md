@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
 ```  
 ```bash
-python -m package.manage
+python package.py
 ```  
   
   

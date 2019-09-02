@@ -69,9 +69,7 @@ class Create(Prep):
         self.pypi_user = pypi_user
         self.pypi_pass = pypi_pass
         self.git_ignore = self.root + os.sep + '.gitignore'
-        self.pkg = self.root + os.sep + 'package'
-        self.mng = self.pkg + os.sep + 'manage.py'
-        self.cred = self.pkg + os.sep + 'cred'
+        self.pkg = self.root + os.sep + 'package.py'
         self.run()
 
     def run(self):
@@ -92,7 +90,7 @@ class Create(Prep):
 
         self.handle_package_init(init_content, license)
         self.create_setup_file(readme, requirements)
-        self.create_package_files()
+        self.create_package_file()
         self.handle_git_ignore()
 
     def get_license(self):
@@ -197,13 +195,11 @@ class Create(Prep):
         with open('setup.py', 'wb') as f:
             f.write(content)
 
-    def create_package_files(self):
+    def create_package_file(self):
         if os.path.exists(self.pkg):
-            raise FileExistsError("package directory already exist and may be used for other functionality")
+            raise FileExistsError("package.py already exist and may be used for other functionality")
         else:
-            os.mkdir(self.pkg)
             key, token = encrypt(
-                path=self.cred,
                 url=self.git.url,
                 email=self.git.email,
                 username=self.git.username,
@@ -212,9 +208,8 @@ class Create(Prep):
                 pypi_pass=self.pypi_pass,
             )
             upload = "\n        lambda: manager.upload()," if self.pypi_user and self.pypi_pass else ""
-            with open(self.mng, 'w') as f:
-                f.write(f'''from qaviton_package_manager import Manager
-from qaviton_package_manager import decypt
+            with open(self.pkg, 'w') as f:
+                f.write(f'''from qaviton_package_manager import Manager, decypt
 
 
 manager = Manager(**decypt(
@@ -230,8 +225,6 @@ if __name__ == "__main__":
         lambda: manager.test(),
         lambda: manager.build(),{upload}
     )
-
-Manager(key={key}).update().test().build().upload().run()
 '''                     )
         log.info('created package.py file')
 
