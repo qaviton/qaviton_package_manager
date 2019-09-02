@@ -2,6 +2,7 @@ import os
 import json
 import socket
 import psutil
+from uuid import uuid4
 from time import time, sleep
 from multiprocessing.connection import Listener, Client
 from qaviton_package_manager.utils.functions import find_free_port
@@ -17,7 +18,7 @@ class ServerDownError(ConnectionAbortedError):
 
 
 class Cache:
-    authkey = b'qaviton is cool'
+    authkey = bytes(str(uuid4()), 'utf-8')
     root = get_root()
     file = root + os.sep + ignore_list[1]
     errors = root + os.sep + ignore_list[2]
