@@ -13,7 +13,7 @@
 
 
 __author__ = 'Qaviton'
-__version__ = "2019.9.2.1.50.41.786573"
+__version__ = "2019.9.2.1.53.56.128388"
 __author_email__ = 'info@qaviton.com'
 __description__ = 'a package manager for projects with private repositories'
 __url__ = 'https://github.com/qaviton/qaviton_package_manager'

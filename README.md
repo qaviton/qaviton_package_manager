@@ -3,7 +3,7 @@
   
 Tired of redundant packaging systems for your software?  
 qaviton is here to help!  
-we can package everything into git branches  
+we can package everything into simple  
   
 git branches:  
 ```
