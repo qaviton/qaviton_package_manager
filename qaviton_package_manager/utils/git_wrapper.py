@@ -261,7 +261,7 @@ class Git(GitBase):
     def create_branch(git, name): git(f'checkout -b "{escape(name)}"'); return git
     def create_remote(git, branch=None): git(f'push -u origin "{escape(git.get_current_branch().decode("utf-8") if branch is None else branch)}"'); return git
     def checkout(git, to_branch): git(f'checkout "{escape(to_branch)}"'); return git
-
+    def has_remote(git): return git('checkout') is True
     def delete_remote(git, branch): git(f'push origin --delete "{escape(branch)}"'); return git
     def delete_local(git, branch): git(f'branch -d "{escape(branch)}"'); return git
     def tag(git, name, msg): git(f'tag -a {name} -m "{escape(msg)}"'); return git
