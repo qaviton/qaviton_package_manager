@@ -59,6 +59,8 @@ def try_or_none(f, *args, **kwargs):
 def clean_distibution():
     if os.path.exists('build'): shutil.rmtree('build')
     if os.path.exists('dist'): shutil.rmtree('dist')
+    if os.path.exists(get_package_name()+'.egg-info'):
+        shutil.rmtree(get_package_name()+'.egg-info')
 
 
 def create_distibution_packages():
