@@ -35,7 +35,7 @@ class Manager:
         email=None,
         pypi_user=None,
         pypi_pass=None,
-        cache_timeout=-1,
+        cache_timeout=None,
         **kwargs,
     ):
         self.vars = {
@@ -58,9 +58,10 @@ class Manager:
             email=self.vars['email'],
         )
         self.cache = Cache()
-        if not self.cache.server_is_alive():
-            self.cache.create_server(**self.vars)
-        self.git_cache_sync()
+        if self.vars['cache_timeout']:
+            if not self.cache.server_is_alive():
+                self.cache.create_server(**self.vars)
+            self.git_cache_sync()
         self.test = Test()
 
     def git_cache_sync(self):
@@ -124,7 +125,7 @@ class Manager:
         self._ord.extend(kwargs.keys())
         for key in self._ord: self._run(getattr(self, key), *self.kwargs[key])
 
-    def create(self, package_name=None): Create(self.git, package_name); return self
+    def create(self, package_name=None): Create(self.git, self.vars['pypi_user'], self.vars['pypi_pass'], package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self
     def install_test(self, *packages): InstallTest(self.git, *packages); return self
     def update(self, *packages): Update(self.git, *packages); return self

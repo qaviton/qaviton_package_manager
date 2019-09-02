@@ -33,29 +33,39 @@ pip install --upgrade qaviton_package_manager
 ## Usage  
   
 first let's create a manager directory:  
-```bash
-python -m qaviton_package_manager --create
-enter your git username:
-enter your git password:
-enter your pypi username:
-enter your pypi password:
+```
+(venv) windows> python -m qaviton_package_manager ^
+--create ^
+--url "https://github.com/owner/project.git" ^
+--username "user1" ^
+--password "pass@#$" ^
+--email "awsome@qaviton.com" ^
+--pypi_user "supasayajin" ^
+--pypi_pass "final space" 
 ```  
-  
+```bash
+(venv) bash$ python -m qaviton_package_manager  \
+--create  \
+--url "https://github.com/owner/project.git"  \
+--username "user1"  \
+--password "pass@#$"  \
+--email "awsome@qaviton.com"  \
+--pypi_user "supasayajin"  \
+--pypi_pass "final space"  \
+/
+```  
+
 now let's build a package:  
 ```python
 # package/manage.py
 from qaviton_package_manager import Manager
-from package.cred import url, email, username, password, pypi_user, pypi_pass
+from qaviton_package_manager import decypt
 
 
-manager = Manager(
-    url=url,
-    email=email,
-    username=username,
-    password=password,
-    pypi_user=pypi_user,
-    pypi_pass=pypi_pass,
-)
+manager = Manager(**decypt(
+    key=b'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==',
+    token=b'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==',
+))
 
 
 if __name__ == "__main__":
@@ -63,9 +73,11 @@ if __name__ == "__main__":
         lambda: manager.update(),
         lambda: manager.update_test(),
         lambda: manager.test(),
-        lambda: manager.build(to_branch='release/latest'),
-        # lambda: manager.upload(), # only for pypi public packages (you can uncomment if you understand the implications)
+        # lambda: manager.build(to_branch='release/latest'),
+        lambda: manager.build(),
+        lambda: manager.upload(),
     )
+
 ```  
 ```bash
 python -m package.manage

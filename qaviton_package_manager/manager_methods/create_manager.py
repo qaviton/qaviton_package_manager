@@ -17,10 +17,11 @@ from qaviton_package_manager.utils.git_wrapper import RepoData
 from qaviton_package_manager.conf import LICENSE, README
 from qaviton_package_manager.utils.functions import set_requirements, set_test_requirements
 from qaviton_package_manager.utils.logger import log
-from qaviton_package_manager.utils.system import escape
+# from qaviton_package_manager.utils.system import escape
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods import Prep
 from qaviton_package_manager.conf import ignore_list
+from qaviton_package_manager.utils.cryp import encrypt
 
 
 class HTTP:
@@ -50,7 +51,7 @@ def select_license():
 
 
 class Create(Prep):
-    def __init__(self, git: Git, package_name=None):
+    def __init__(self, git: Git, pypi_user, pypi_pass, package_name=None):
         log.info("creating git packaging system")
 
         if package_name is None:
@@ -60,16 +61,17 @@ class Create(Prep):
             self.package_name = package_name
 
         Prep.__init__(self, git, self.package_name)
-        self.username = input("enter your git username:")
-        self.pypi_user = input("enter your pypi username:")
         self.repo = RepoData()
 
         if os.path.exists(self.setup_path):
             raise FileExistsError("setup.py already exist")
 
+        self.pypi_user = pypi_user
+        self.pypi_pass = pypi_pass
         self.git_ignore = self.root + os.sep + '.gitignore'
         self.pkg = self.root + os.sep + 'package'
         self.mng = self.pkg + os.sep + 'manage.py'
+        self.cred = self.pkg + os.sep + 'cred'
         self.run()
 
     def run(self):
@@ -90,7 +92,7 @@ class Create(Prep):
 
         self.handle_package_init(init_content, license)
         self.create_setup_file(readme, requirements)
-        self.create_package_file()
+        self.create_package_files()
         self.handle_git_ignore()
 
     def get_license(self):
@@ -195,29 +197,41 @@ class Create(Prep):
         with open('setup.py', 'wb') as f:
             f.write(content)
 
-    def create_package_file(self):
+    def create_package_files(self):
         if os.path.exists(self.pkg):
             raise FileExistsError("package directory already exist and may be used for other functionality")
         else:
             os.mkdir(self.pkg)
+            key, token = encrypt(
+                path=self.cred,
+                url=self.git.url,
+                email=self.git.email,
+                username=self.git.username,
+                password=self.git.password,
+                pypi_user=self.pypi_user,
+                pypi_pass=self.pypi_pass,
+            )
+            upload = "\n        lambda: manager.upload()," if self.pypi_user and self.pypi_pass else ""
             with open(self.mng, 'w') as f:
                 f.write(f'''from qaviton_package_manager import Manager
+from qaviton_package_manager import decypt
 
-# this approach might not be safe enough
-# Manager(
-#     url="https://github.com/qaviton/qaviton_package_manager.git", 
-#     username="contributor1", 
-#     password="123456", 
-#     pypi_user="owner", 
-#     pypi_pass="654321"
-# ).run(update=[], test=['python -m pytest tests'], build=[], upload=[])
 
-# $> python package.py --password "pwd" --pypi_pass "p1"
-Manager(
-  url="{escape(str(self.git.get_url())[2:-1])}", 
-  username="{escape(self.username)}",
-  pypi_user="{escape(self.pypi_user)}",
-).update().test('python -m pytest tests').build().upload().run()
+manager = Manager(**decypt(
+    key={key},
+    token={token},
+))
+
+
+if __name__ == "__main__":
+    manager.run(
+        lambda: manager.update(),
+        lambda: manager.update_test(),
+        lambda: manager.test(),
+        lambda: manager.build(),{upload}
+    )
+
+Manager(key={key}).update().test().build().upload().run()
 '''                     )
         log.info('created package.py file')
 
