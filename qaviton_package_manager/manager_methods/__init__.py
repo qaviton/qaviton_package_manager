@@ -97,11 +97,13 @@ class Prep:
             print("creating package...")
             os.mkdir(self.pkg_path)
             open(self.pkg_init, 'w').close()
+            self.git.add(self.pkg_init)
             init = b''
         elif not os.path.exists(self.pkg_init):
             log.warning(f"file: {self.pkg_init} is missing")
             print("creating package init file...")
             open(self.pkg_init, 'w').close()
+            self.git.add(self.pkg_init)
             init = b''
         else:
             with open(self.pkg_init, 'rb') as f:

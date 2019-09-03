@@ -15,7 +15,9 @@
 import os
 from qaviton_package_manager.utils.git_wrapper import RepoData
 from qaviton_package_manager.conf import LICENSE, README
-from qaviton_package_manager.utils.functions import set_requirements, set_test_requirements
+from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
+from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS, TESTS_DIR
+from qaviton_package_manager.utils.pip_wrapper import pip
 from qaviton_package_manager.utils.logger import log
 # from qaviton_package_manager.utils.system import escape
 from qaviton_package_manager.utils.git_wrapper import Git
@@ -83,15 +85,49 @@ class Create(Prep):
         readme = self.get_readme()
 
         log.info("asserting package requirements")
-        requirements = set_requirements(self.root)
+        requirements = self.set_requirements()
 
         log.info("asserting package testing requirements")
-        set_test_requirements(self.root)
+        self.set_test_requirements()
 
         self.handle_package_init(init_content, license)
         self.create_setup_file(readme, requirements)
         self.create_package_file()
         self.handle_git_ignore()
+
+    def set_requirements(self):
+        path = get_requirements(self.root)
+        if not os.path.exists(path):
+            print(f'{REQUIREMENTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.REQUIREMENTS = "filename"')
+            name = input(f'select REQUIREMENTS filename({REQUIREMENTS} default):')
+            if not name: name = REQUIREMENTS
+            path = self.root + os.sep + name
+            if not os.path.exists(path):
+                pip.freeze(path)
+                self.git.add(path)
+        return path
+
+    def set_test_requirements(self):
+        path = get_test_requirements(self.root)
+        if not os.path.exists(path):
+            print(f'{REQUIREMENTS_TESTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.REQUIREMENTS_TESTS = "filename"')
+            name = input(f'select REQUIREMENTS_TESTS filename({REQUIREMENTS_TESTS} default):')
+            if not name: name = REQUIREMENTS_TESTS
+            path = self.root + os.sep + name
+            if not os.path.exists(path):
+                with open(path, 'w') as f:
+                    f.write('pytest')
+                self.git.add(path)
+        path = self.root + os.sep + TESTS_DIR
+        if not os.path.exists(path):
+            print(f'{TESTS_DIR} not found\nP.S. you can change the default tests directory with qaviton_package_manager.conf.TESTS_DIR = "filename"')
+            name = input(f'select TESTS_DIR filename({TESTS_DIR} default):')
+            path = self.root + os.sep + name
+            if not os.path.exists(path):
+                os.mkdir(path)
+                init_path = path + os.sep + '__init__.py'
+                open(init_path, 'w').close()
+                self.git.add(init_path)
 
     def get_license(self):
         license = self.root + os.sep + LICENSE
@@ -110,6 +146,7 @@ class Create(Prep):
                 content = r.json()['body']
                 with open(license, 'w') as f:
                     f.write(content)
+                self.git.add(license)
         return {'file': license, 'key': key}
 
     def get_readme(self):
@@ -123,6 +160,7 @@ class Create(Prep):
                 print(f'creating file: {readme}')
                 with open(readme, 'w') as f:
                     f.write(self.package_name.replace('_', ' '))
+                self.git.add(readme)
         return readme
 
     def handle_package_init(self, init_content: bytes, license: dict):
@@ -165,35 +203,38 @@ class Create(Prep):
             f.write(content)
 
     def create_setup_file(self, readme, requirements):
-        content = b''.join([
-            b'package_name = "' + bytes(self.package_name, 'utf-8') + b'"\n',
-            b'\n',
-            b'\n',
-            b'if __name__ == "__main__":\n',
-            b'    from sys import version_info as v\n',
-            b'    from ' + bytes(self.package_name, 'utf-8') + b' import __author__, __version__, __author_email__, __description__, __url__, __license__\n',
-            b'    from setuptools import setup, find_packages\n',
-            b'    with open("' + bytes(requirements.rsplit(os.sep, 1)[1], 'utf-8') + b'") as f: requirements = f.read().splitlines()\n',
-            b'    with open("' + bytes(readme.rsplit(os.sep, 1)[1], 'utf-8') + b'") as f: long_description = f.read()\n',
-            b'    setup(\n',
-            b'        name=package_name,\n',
-            b'        version=__version__,\n',
-            b'        author=__author__,\n',
-            b'        author_email=__author_email__,\n',
-            b'        description=__description__,\n',
-            b'        long_description=long_description,\n',
-            b'        long_description_content_type="text/markdown",\n',
-            b'        url=__url__,\n',
-            b'        packages=[pkg for pkg in find_packages() if pkg.startswith("' + bytes(self.package_name, 'utf-8') + b'")],\n',
-            b'        license=__license__,\n',
-            b'        classifiers=[\n',
-            b'            f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
-            b'        ],\n',
-            b'        install_requires=requirements\n',
-            b'    )\n',
-        ])
-        with open('setup.py', 'wb') as f:
-            f.write(content)
+        path = self.root + os.sep + 'setup.py'
+        if not os.path.exists(path):
+            content = b''.join([
+                b'package_name = "' + bytes(self.package_name, 'utf-8') + b'"\n',
+                b'\n',
+                b'\n',
+                b'if __name__ == "__main__":\n',
+                b'    from sys import version_info as v\n',
+                b'    from ' + bytes(self.package_name, 'utf-8') + b' import __author__, __version__, __author_email__, __description__, __url__, __license__\n',
+                b'    from setuptools import setup, find_packages\n',
+                b'    with open("' + bytes(requirements.rsplit(os.sep, 1)[1], 'utf-8') + b'") as f: requirements = f.read().splitlines()\n',
+                b'    with open("' + bytes(readme.rsplit(os.sep, 1)[1], 'utf-8') + b'", encoding="utf8") as f: long_description = f.read()\n',
+                b'    setup(\n',
+                b'        name=package_name,\n',
+                b'        version=__version__,\n',
+                b'        author=__author__,\n',
+                b'        author_email=__author_email__,\n',
+                b'        description=__description__,\n',
+                b'        long_description=long_description,\n',
+                b'        long_description_content_type="text/markdown",\n',
+                b'        url=__url__,\n',
+                b'        packages=[pkg for pkg in find_packages() if pkg.startswith("' + bytes(self.package_name, 'utf-8') + b'")],\n',
+                b'        license=__license__,\n',
+                b'        classifiers=[\n',
+                b'            f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
+                b'        ],\n',
+                b'        install_requires=requirements\n',
+                b'    )\n',
+            ])
+            with open(path, 'wb') as f:
+                f.write(content)
+            self.git.add(path)
 
     def create_package_file(self):
         if os.path.exists(self.pkg):
@@ -234,7 +275,10 @@ if __name__ == "__main__":
             print('creating .gitignore file')
             with open(self.git_ignore, 'w') as f:
                 f.write('\n'.join(ignore_list))
+            self.git.add(self.git_ignore)
         else:
+            with open(self.git_ignore) as f:
+                lines = f.read().splitlines()
             with open(self.git_ignore, 'a') as f:
-                f.write('\n'+'\n'.join(ignore_list))
+                f.write('\n'+'\n'.join([line for line in ignore_list if line not in lines]))
         log.info('added files to .gitignore file')
