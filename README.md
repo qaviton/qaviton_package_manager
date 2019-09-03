@@ -108,8 +108,14 @@ if __name__ == "__main__":
     )
 
 ```  
+make sure you have at list 1 passing test for your package 
+```python
+# tests/my_package_test.py
+def test_with_100p_coverage():
+    print("testing my package!\nPASS")
+```
 ```bash
-# make sure you have at list 1 passing test for your package 
+# we can now create a package
 python package.py
 ```  
   
