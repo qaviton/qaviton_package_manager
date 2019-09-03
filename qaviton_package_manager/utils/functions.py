@@ -40,6 +40,7 @@ def set_test_requirements(root):
         path = root + os.sep + name
         if not os.path.exists(path):
             os.mkdir(path)
+            open(path+os.sep+'__init__.py')
 
 
 def try_to(f, *args, **kwargs):

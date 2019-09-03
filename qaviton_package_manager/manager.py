@@ -35,6 +35,10 @@ class Manager:
         email=None,
         pypi_user=None,
         pypi_pass=None,
+        docker_url=None,
+        docker_user=None,
+        docker_pass=None,
+        docker_email=None,
         cache_timeout=None,
         **kwargs,
     ):
@@ -45,6 +49,10 @@ class Manager:
             'email': email,
             'pypi_user': pypi_user,
             'pypi_pass': pypi_pass,
+            'docker_url': docker_url,
+            'docker_user': docker_user,
+            'docker_pass': docker_pass,
+            'docker_email': docker_email,
             'cache_timeout': cache_timeout,
         }
         self.kwargs = {}
@@ -59,23 +67,22 @@ class Manager:
         )
         self.cache = Cache()
         if self.vars['cache_timeout']:
+            self.vars['cache_timeout'] = int(self.vars['cache_timeout'])
             if not self.cache.server_is_alive():
                 self.cache.create_server(**self.vars)
-            self.git_cache_sync()
+            self.vars_sync()
         self.test = Test()
 
-    def git_cache_sync(self):
-        credentials = {
-            'url': self.git.url,
-            'username': self.git.username,
-            'password': self.git.password,
-            'email': self.git.email,
-        }
-        for key, value in credentials.items():
+    def vars_sync(self):
+        self.vars['url'] = self.git.url
+        self.vars['username'] = self.git.username
+        self.vars['password'] = self.git.password
+        self.vars['email'] = self.git.email
+        for key, value in self.vars.items():
             if not value:
                 response = self.cache.get(key)
                 if key in response:
-                    self.git[key] = response[key]
+                    self.vars[key] = response[key]
             else:
                 self.cache.post(**{key: value})
 
@@ -120,12 +127,14 @@ class Manager:
             exit(code=1)
 
     def run(self, *functions, **kwargs):
-        for f in functions: self._run(f)
         self._set_kwargs(kwargs)
         self._ord.extend(kwargs.keys())
-        for key in self._ord:
-            if hasattr(self, key):
-                self._run(getattr(self, key), *self.kwargs[key])
+        if not self._ord:
+            for f in functions: self._run(f)
+        else:
+            for key in self._ord:
+                if hasattr(self, key):
+                    self._run(getattr(self, key), *self.kwargs[key])
 
     def create(self, package_name=None): Create(self.git, self.vars['pypi_user'], self.vars['pypi_pass'], package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self
