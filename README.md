@@ -197,11 +197,11 @@ while True:
   
 ## warnings  
 * this manager is meant for automated ci cd purposes  
-and should not be used instead regular git commits/pushes  
+and should not be used instead of regular git commit/push/merge.  
 make sure to avoid using it on unstable branches  
 to avoid failed packaging requests or potential data loss.  
 we recommend using it from a CI CD dedicated branch.  
   
-* the manager defaults to encryped credentials,  
-if encrypted credentials on the disk are not secure enough  
+* the manager defaults to encrypted credentials,  
+if encrypted credentials on the disk are not secure enough,  
 please make sure to enable caching, to store credentials in memory  
