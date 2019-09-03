@@ -123,7 +123,9 @@ class Manager:
         for f in functions: self._run(f)
         self._set_kwargs(kwargs)
         self._ord.extend(kwargs.keys())
-        for key in self._ord: self._run(getattr(self, key), *self.kwargs[key])
+        for key in self._ord:
+            if hasattr(self, key):
+                self._run(getattr(self, key), *self.kwargs[key])
 
     def create(self, package_name=None): Create(self.git, self.vars['pypi_user'], self.vars['pypi_pass'], package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self

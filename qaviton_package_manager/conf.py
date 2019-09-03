@@ -37,4 +37,5 @@ ignore_list = [
     'package.py',
     '.qaviton_package_manager_cache',
     '.qaviton_package_manager_cache.errors',
+    'test_report.xml',
 ]
