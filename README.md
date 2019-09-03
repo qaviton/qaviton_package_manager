@@ -141,7 +141,7 @@ python package.py --test "system" "echo success" --test "python" "-c" "print(\"p
 #### Script:  
 ```python
 # ci_cd.py
-from qaviton_package_manager import run, escape
+from qaviton_package_manager import run, escape, python
 from package import manager
 from datetime import datetime
 
@@ -168,7 +168,7 @@ manager.run(
     lambda: run(f"docker tag {docker_tag} yourhubusername/verse_gapminder:firsttry"),
     lambda: run("docker push yourhubusername/verse_gapminder"),
     # deploy script
-    lambda: run("deploy.py")    
+    lambda: python("deploy.py")    
 )
 ```
 ```python
