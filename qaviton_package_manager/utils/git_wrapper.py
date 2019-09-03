@@ -81,6 +81,8 @@ class Git(GitBase):
         '\\',
     )
 
+    remote = 'origin'
+
     @classmethod
     def clone(
         cls,
@@ -149,8 +151,9 @@ class Git(GitBase):
         #         return git
         #     git.switch = switch
 
-        git('config --global --replace-all credential.helper store')
-        try_to(git, 'config --global credential.helper store')
+        if git('config --global --get credential.helper'):
+            git('config --global --unset credential.helper')
+        git('config --global credential.helper \'cache --timeout=31536000\'')
 
         git.root = root
         git.url = url
@@ -191,12 +194,12 @@ class Git(GitBase):
     @url.setter
     def url(git, value):
         if value:
-            # git(f'config remote.origin.url "{escape(url)}"')
+            # git(f'config remote.{git.remote}.url "{escape(url)}"')
             try:
-                git(f'remote add origin "{escape(value)}"')
+                git(f'remote add {git.remote} "{escape(value)}"')
             except:
                 try:
-                    git(f'remote set-url origin "{escape(value)}"')
+                    git(f'remote set-url {git.remote} "{escape(value)}"')
                 except:
                     pass
             git._url = value
@@ -206,7 +209,8 @@ class Git(GitBase):
     @username.setter
     def username(git, value):
         if value:
-            git(f'config --global user.name "{escape(value)}"')
+            git(f'echo "username={escape(value)}" | git credential approve')
+            # git(f'config --global user.name "{escape(value)}"')
             git._username = value
         else:
             git._username = try_or_none(git.get_username)
@@ -214,7 +218,8 @@ class Git(GitBase):
     @password.setter
     def password(git, value):
         if value:
-            git(f'config --global user.password "{escape(value)}"')
+            git(f'echo "password={escape(value)}" | git credential approve')
+            # git(f'config --global user.password "{escape(value)}"')
             git._password = value
         else:
             git._password = try_or_none(git.get_password)
@@ -222,12 +227,13 @@ class Git(GitBase):
     @email.setter
     def email(git, value):
         if value:
-            git(f'config --global user.email "{escape(value)}"')
+            git(f'echo "email={escape(value)}" | git credential approve')
+            # git(f'config --global user.email "{escape(value)}"')
             git._email = value
         else:
             git._email = try_or_none(git.get_email)
 
-    def get_url(git)->str: return git('config --get remote.origin.url').decode('utf-8').splitlines()[0]
+    def get_url(git)->str: return git(f'config --get remote.{git.remote}.url').decode('utf-8').splitlines()[0]
     def get_username(git)->str: return git('config --get user.name').decode('utf-8').splitlines()[0]
     def get_password(git)->str: return git('config --get user.password').decode('utf-8').splitlines()[0]
     def get_email(git)->str: return git('config --get user.email').decode('utf-8').splitlines()[0]
@@ -259,10 +265,10 @@ class Git(GitBase):
             git(f'checkout -b "{escape(branch)}"')
         return git
     def create_branch(git, name): git(f'checkout -b "{escape(name)}"'); return git
-    def create_remote(git, branch=None): git(f'push -u origin "{escape(git.get_current_branch().decode("utf-8") if branch is None else branch)}"'); return git
+    def create_remote(git, branch=None): git(f'push -u {git.remote} "{escape(git.get_current_branch().decode("utf-8") if branch is None else branch)}"'); return git
     def checkout(git, to_branch): git(f'checkout "{escape(to_branch)}"'); return git
     def has_remote(git): return git('checkout') is True
-    def delete_remote(git, branch): git(f'push origin --delete "{escape(branch)}"'); return git
+    def delete_remote(git, branch): git(f'push {git.remote} --delete "{escape(branch)}"'); return git
     def delete_local(git, branch): git(f'branch -d "{escape(branch)}"'); return git
     def tag(git, name, msg): git(f'tag -a {name} -m "{escape(msg)}"'); return git
     def add(git, arg='.', *args): git('add -f', arg, *args); return git
