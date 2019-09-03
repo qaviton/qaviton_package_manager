@@ -20,8 +20,8 @@ class ServerDownError(ConnectionAbortedError):
 class Cache:
     authkey = bytes(str(uuid4()), 'utf-8')
     root = get_root()
-    file = root + os.sep + ignore_list[1]
-    errors = root + os.sep + ignore_list[2]
+    file = root + os.sep + '.qaviton_package_manager_cache'
+    errors = root + os.sep + '.qaviton_package_manager_cache.errors'
     request_timeout = 30
 
     class method:
