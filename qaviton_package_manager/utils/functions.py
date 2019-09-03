@@ -31,7 +31,7 @@ def set_test_requirements(root):
         if not name: name = REQUIREMENTS_TESTS
         path = root + os.sep + name
         if not os.path.exists(path):
-            with open(path) as f:
+            with open(path, 'w') as f:
                 f.write('pytest')
     path = root + os.sep + TESTS_DIR
     if not os.path.exists(path):
@@ -40,7 +40,7 @@ def set_test_requirements(root):
         path = root + os.sep + name
         if not os.path.exists(path):
             os.mkdir(path)
-            open(path+os.sep+'__init__.py')
+            open(path+os.sep+'__init__.py').close()
 
 
 def try_to(f, *args, **kwargs):
