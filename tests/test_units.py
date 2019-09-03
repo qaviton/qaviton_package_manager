@@ -70,9 +70,9 @@ def test_cache():
     assert response == {}
 
 
-def test_git():
-    git = Git()
-    assert git.url == manager.git.url
-    assert git.username == manager.git.username
-    assert git.password == manager.git.password
-    assert git.email == manager.git.email
+# def test_git():
+#     git = Git()
+#     assert git.url == manager.git.url
+#     assert git.username == manager.git.username
+#     assert git.password == manager.git.password
+#     assert git.email == manager.git.email

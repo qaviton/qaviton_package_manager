@@ -132,10 +132,9 @@ class Git(GitBase):
     def __setitem__(git, key, value):
         git.__setattr__(key, value)
 
-    def __del__(git):
-        try_to(git(f'config --global --unset credential.helper store'))
-        if git.password:
-            try_to(git(f'config --global --unset user.password "{escape(git.password)}"'))
+    # def __del__(git):
+    #     if git.is_credential_helper_enabled():
+    #         git.disable_credential_helper()
 
     def __init__(git, url=None, username=None, password=None, email=None, root=None):
         git.version = git('--version').replace(b'git version ', b'')
@@ -150,11 +149,7 @@ class Git(GitBase):
         #         else: git(f'checkout -b "{escape(branch)}"')
         #         return git
         #     git.switch = switch
-
-        if git('config --global --get credential.helper'):
-            git('config --global --unset credential.helper')
-        git('config --global credential.helper \'cache --timeout=31536000\'')
-
+        git.set_credential_helper('cache', '--timeout=31536000')
         git.root = root
         git.url = url
         git.username = username
@@ -209,7 +204,7 @@ class Git(GitBase):
     @username.setter
     def username(git, value):
         if value:
-            git(f'echo "username={escape(value)}" | git credential approve')
+            run(f'echo "username={escape(value)}" | git credential approve')
             # git(f'config --global user.name "{escape(value)}"')
             git._username = value
         else:
@@ -218,7 +213,7 @@ class Git(GitBase):
     @password.setter
     def password(git, value):
         if value:
-            git(f'echo "password={escape(value)}" | git credential approve')
+            run(f'echo "password={escape(value)}" | git credential approve')
             # git(f'config --global user.password "{escape(value)}"')
             git._password = value
         else:
@@ -227,12 +222,20 @@ class Git(GitBase):
     @email.setter
     def email(git, value):
         if value:
-            git(f'echo "email={escape(value)}" | git credential approve')
+            run(f'echo "email={escape(value)}" | git credential approve')
             # git(f'config --global user.email "{escape(value)}"')
             git._email = value
         else:
             git._email = try_or_none(git.get_email)
 
+    def set_credential_helper(git, helper, *options):
+        git.disable_credential_helper()
+        current = git.get_credential_helper()
+        if helper not in current:
+            git(f"config --global credential.helper '{helper}{' ' + ' '.join(options) if options else ''}'")
+        return git
+    def get_credential_helper(git): return git('config --global --get credential.helper').decode('utf-8').splitlines()[0]
+    def disable_credential_helper(git): try_to(git, f'config --global --unset credential.helper'); return git
     def get_url(git)->str: return git(f'config --get remote.{git.remote}.url').decode('utf-8').splitlines()[0]
     def get_username(git)->str: return git('config --get user.name').decode('utf-8').splitlines()[0]
     def get_password(git)->str: return git('config --get user.password').decode('utf-8').splitlines()[0]
