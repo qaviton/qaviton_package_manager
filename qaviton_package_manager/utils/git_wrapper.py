@@ -193,6 +193,7 @@ class Git(GitBase):
             try:
                 git(f'remote add {git.remote} "{escape(value)}"')
             except:
+                log.info("IGNORED fatal: remote origin already exists.")
                 try:
                     git(f'remote set-url {git.remote} "{escape(value)}"')
                 except:
