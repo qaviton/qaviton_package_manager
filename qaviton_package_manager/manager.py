@@ -24,6 +24,7 @@ from qaviton_package_manager.manager_methods.distribute_to_git import Build
 from qaviton_package_manager.manager_methods.distribute_to_pypi import Upload
 from qaviton_package_manager.manager_methods.test_package import Test
 from qaviton_package_manager.utils.cache_cred import Cache
+from qaviton_package_manager.exceptions import BuildAbortError
 
 
 class Manager:
@@ -122,6 +123,9 @@ class Manager:
             return f(*args, **kwargs)
         except SyntaxError as e:
             raise e
+        except BuildAbortError as e:
+            print(e)
+            exit(0)
         except:
             print(format_exc())
             exit(code=1)
@@ -147,3 +151,12 @@ class Manager:
     def uninstall_test(self, *packages): RemoveTest(self.git, *packages); return self
     def build(self, to_branch='build/latest', version=None): Build(self.git, to_branch=to_branch, version=version); return self
     def upload(self): Upload(self.vars['pypi_user'], self.vars['pypi_pass']); return self
+    def should_build(self, from_branch=None, to_branch='build/latest'):
+        current_branch = self.git.get_current_branch()
+        if from_branch is None: from_branch = current_branch
+        if from_branch != current_branch:
+            self.git.switch(from_branch)
+            if self.git.has_remote():
+                self.git.pull()
+        if self.git.has_commitable_changes() or self.git.can_merge(into=to_branch): return self
+        raise BuildAbortError('no detectable changes, build aborted')

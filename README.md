@@ -83,7 +83,7 @@ project/
 ```
 now let's build a package:  
 ```python
-# package/manage.py
+# package.py
 from qaviton_package_manager import Manager
 from qaviton_package_manager import decypt
 
@@ -147,12 +147,15 @@ docker_pass = manager.vars['docker_pass']
 docker_email = manager.vars['docker_email']
 SSH_PRIVATE_KEY = manager.kwargs['SSH_PRIVATE_KEY']
 docker_tag = manager.kwargs['docker_tag']
+branch_build = "ci_cd/latest"
+dev_branch = "dev"
 
 manager.run(
+    lambda: manager.should_build(from_branch=dev_branch, to_branch=branch_build),
     lambda: manager.install(),
     lambda: manager.install_test(),
     lambda: manager.test.pytest("tests/ci_cd"),
-    lambda: manager.build(to_branch="ci_cd/latest", version=f'{d.year}.{d.month}.{d.day}'),
+    lambda: manager.build(to_branch=branch_build, version=f'{d.year}.{d.month}.{d.day}'),
     # docker distribute
     lambda: run(f"docker login --username=\"{escape(docker_user)}\" --password=\"{escape(docker_pass)}\" --email=\"{escape(docker_email)}\" \"{escape(docker_url)}\""),
     lambda: run(f"docker build --force-rm -t test-multi-stage-builds --build-arg SSH_PRIVATE_KEY=\"{escape(SSH_PRIVATE_KEY)}\" ."),
@@ -161,6 +164,23 @@ manager.run(
     # deploy script
     lambda: run("deploy.py")    
 )
+```
+```python
+# schedualer.py
+from time import time, sleep
+from datetime import datetime, timedelta
+from qaviton_package_manager import pythonCIO
+
+d = datetime.utcnow()
+date = datetime(year=d.year, month=d.month, day=d.day, hour=22)
+delta = timedelta(days=1)
+
+# build a package once a day at 22pm
+while True:
+    pythonCIO('import ci_cd')
+    date += delta
+    sleep(date.timestamp()-time())
+    
 ```  
   
 ## not yet supported  

@@ -234,6 +234,16 @@ class Git(GitBase):
         if helper not in current:
             git(f"config --global credential.helper '{helper}{' ' + ' '.join(options) if options else ''}'")
         return git
+
+    def can_merge(git, into):
+        """we check if the branch we want to send commits to is up to date or not. if current branch is equal to into branch we check if we want to commit"""
+        current_branch = git.get_current_branch()
+        if current_branch == into: return git.has_commitable_changes()
+        for line in git(f'branch --contains {current_branch}').splitlines():
+            if line.strip().decode('utf-8') == into:
+                return True
+
+    def has_commitable_changes(git): return git('diff')
     def get_credential_helper(git): return git('config --global --get credential.helper').decode('utf-8').splitlines()[0]
     def disable_credential_helper(git): try_to(git, f'config --global --unset credential.helper'); return git
     def get_url(git)->str: return git(f'config --get remote.{git.remote}.url').decode('utf-8').splitlines()[0]
@@ -241,7 +251,7 @@ class Git(GitBase):
     def get_password(git)->str: return git('config --get user.password').decode('utf-8').splitlines()[0]
     def get_email(git)->str: return git('config --get user.email').decode('utf-8').splitlines()[0]
     def get_config(git)->[bytes]: return git('config --list').splitlines()
-    def get_current_branch(git)->bytes: return git('symbolic-ref --short HEAD').strip()
+    def get_current_branch(git)->str: return git('symbolic-ref --short HEAD').decode('utf-8').strip()
     def get_remote_branches(git)->[bytes]: return [branch.strip().split(b' -> ', 1)[0] for branch in git('branch -r').splitlines()]
     def get_local_branches(git)->[bytes]:
         branches = git('branch').splitlines()
@@ -252,7 +262,7 @@ class Git(GitBase):
                 branches[i] = branch
         return branches
     def commit(git, msg):
-        if git('diff'):
+        if git.has_commitable_changes():
             git(f'commit -a -m "{escape(msg)}"')
         return git
     def stash(git): git('stash'); return git
@@ -268,9 +278,9 @@ class Git(GitBase):
             git(f'checkout -b "{escape(branch)}"')
         return git
     def create_branch(git, name): git(f'checkout -b "{escape(name)}"'); return git
-    def create_remote(git, branch=None): git(f'push -u {git.remote} "{escape(git.get_current_branch().decode("utf-8") if branch is None else branch)}"'); return git
+    def create_remote(git, branch=None): git(f'push -u {git.remote} "{escape(git.get_current_branch() if branch is None else branch)}"'); return git
     def checkout(git, to_branch): git(f'checkout "{escape(to_branch)}"'); return git
-    def has_remote(git): return git('checkout') is True
+    def has_remote(git): return git('checkout')
     def delete_remote(git, branch): git(f'push {git.remote} --delete "{escape(branch)}"'); return git
     def delete_local(git, branch): git(f'branch -d "{escape(branch)}"'); return git
     def tag(git, name, msg): git(f'tag -a {name} -m "{escape(msg)}"'); return git
