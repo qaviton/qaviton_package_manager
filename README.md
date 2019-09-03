@@ -199,4 +199,3 @@ we recommend using it from a CI CD dedicated branch.
 * the manager defaults to encryped credentials,  
 if encrypted credentials on the disk are not secure enough  
 please make sure to enable caching, to store credentials in memory  
-  

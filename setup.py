@@ -20,7 +20,7 @@ if __name__ == "__main__":
     from qaviton_package_manager import __author__, __version__, __author_email__, __description__, __url__, __license__
     from setuptools import setup, find_packages
     with open("requirements.txt") as f: requirements = f.read().splitlines()
-    with open("README.md") as f: long_description = f.read()
+    with open("README.md", encoding="utf8") as f: long_description = f.read()
     setup(
         name=package_name,
         version=__version__,
