@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from qaviton_package_manager.utils.functions import upload_to_pypi
+from qaviton_package_manager.utils.functions import upload_to_pypi, get_package_name
 from qaviton_package_manager.utils.pip_wrapper import pip
 
 
@@ -23,3 +23,6 @@ class Upload:
         if not pip.exist('twine'):
             pip.install('twine')
         upload_to_pypi(pypi_user, pypi_pass)
+        print('package uploaded to pypi')
+        print('you can now install this package:')
+        print(f'pip install {get_package_name()}')
