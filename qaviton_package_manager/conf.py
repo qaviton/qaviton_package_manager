@@ -17,6 +17,8 @@ README = 'README.md'
 REQUIREMENTS = 'requirements.txt'
 REQUIREMENTS_TESTS = 'requirements-test.txt'
 TESTS_DIR = 'tests'
+GIT_IGNORE = '.gitignore'
+PACKAGE = 'package.py'
 
 
 # https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support

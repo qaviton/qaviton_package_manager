@@ -14,12 +14,11 @@
 
 import os
 from qaviton_pip import pip
-from qaviton_package_manager.utils.git_wrapper import RepoData
-from qaviton_package_manager.conf import LICENSE, README
+from qaviton_processes import escape
+from qaviton_package_manager.conf import LICENSE, README, PACKAGE, GIT_IGNORE
 from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
 from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS, TESTS_DIR
 from qaviton_package_manager.utils.logger import log
-# from qaviton_package_manager.utils.system import escape
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods import Prep
 from qaviton_package_manager.conf import ignore_list
@@ -63,15 +62,14 @@ class Create(Prep):
             self.package_name = package_name
 
         Prep.__init__(self, git, self.package_name)
-        self.repo = RepoData()
 
         if os.path.exists(self.setup_path):
             raise FileExistsError("setup.py already exist")
 
         self.pypi_user = pypi_user
         self.pypi_pass = pypi_pass
-        self.git_ignore = self.root + os.sep + '.gitignore'
-        self.pkg = self.root + os.sep + 'package.py'
+        self.git_ignore = self.root + os.sep + GIT_IGNORE
+        self.pkg = self.root + os.sep + PACKAGE
         self.run()
 
     def run(self):
@@ -90,8 +88,8 @@ class Create(Prep):
         log.info("asserting package testing requirements")
         self.set_test_requirements()
 
-        self.handle_package_init(init_content, license)
-        self.create_setup_file(readme, requirements)
+        package_params = self.handle_package_init(init_content, license)
+        self.create_setup_file(readme, requirements, package_params)
         self.create_package_file()
         self.handle_git_ignore()
 
@@ -165,45 +163,50 @@ class Create(Prep):
         return readme
 
     def handle_package_init(self, init_content: bytes, license: dict):
-        missing_init_params = []
+        package_params = {}
 
         tmp = b'\n' + init_content
         if b'\n__author__' not in tmp:
-            log.warning(f'missing __author__ in init file, adding line: __author__ = {str(self.repo.username)[1:-1]}')
-            missing_init_params.append(b'\n__author__ = "' + self.repo.username + b'"')
+            log.warning(f'missing __author__ in init file')
+            package_params['author'] = b'"' + escape(self.git.username).encode('utf-8') + b'"'
+        else:
+            package_params['author'] = tmp.split(b'\n__author__', 1)[1].split(b'=', 1)[1].split(b'\n', 1)[0].strip()
 
         if b'\n__version__' not in tmp:
-            log.warning(f'missing __version__ in init file, adding line: __version__ = 0.0.1')
-            missing_init_params.append(b'\n__version__ = "0.0.1"')
+            log.warning(f'missing __version__ in init file')
+            package_params['version'] = b'"0.0.1"'
+        else:
+            package_params['version'] = tmp.split(b'\n__version__', 1)[1].split(b'=', 1)[1].split(b'\n', 1)[0].strip()
 
         if b'\n__author_email__' not in tmp:
-            log.warning(f'missing __author_email__ in init file, adding line: __author_email__ = {str(self.repo.useremail)[1:-1]}')
-            missing_init_params.append(b'\n__author_email__ = "' + self.repo.useremail + b'"')
+            log.warning(f'missing __author_email__ in init file')
+            package_params['email'] = b'"' + escape(self.git.email).encode('utf-8') + b'"'
+        else:
+            package_params['email'] = tmp.split(b'\n__author_email__', 1)[1].split(b'=', 1)[1].split(b'\n', 1)[0].strip()
 
         if b'\n__description__' not in tmp:
             description = self.package_name.replace('_', ' ')
-            log.warning(f'missing __description__ in init file, adding line: __description__ = {description}')
-            missing_init_params.append(b'\n__description__ = "' + bytes(description, 'utf-8') + b'"')
+            log.warning(f'missing __description__ in init file')
+            package_params['description'] = b'"' + description.encode('utf-8') + b'"'
+        else:
+            package_params['description'] = tmp.split(b'\n__description__', 1)[1].split(b'=', 1)[1].split(b'\n', 1)[0].strip()
 
         if b'\n__url__' not in tmp:
-            log.warning(f'missing __url__ in init file, adding line: __url__ = {str(self.repo.url)[1:-1]}')
-            missing_init_params.append(b'\n__url__ = "' + self.repo.url + b'"')
+            log.warning(f'missing __url__ in init file')
+            package_params['url'] = b'"' + escape(self.git.url).encode('utf-8') + b'"'
+        else:
+            package_params['url'] = tmp.split(b'\n__url__', 1)[1].split(b'=', 1)[1].split(b'\n', 1)[0].strip()
 
         if b'\n__license__' not in tmp:
             if license["key"] is None:
                 license["key"] = select_license()
-            log.warning(f'missing __license__ in init file, adding line: __license__ = {license["key"]}')
-            missing_init_params.append(b'\n__license__ = "' + bytes(license["key"], 'utf-8') + b'"')
+            log.warning(f'missing __license__ in init file')
+            package_params['license'] = b'"' + license["key"].encode('utf-8') + b'"'
+        else:
+            package_params['license'] = tmp.split(b'\n__license__', 1)[1].split(b'=', 1)[1].split(b'\n', 1)[0].strip()
+        return package_params
 
-        if missing_init_params:
-            missing_init_params.append(b'\n')
-
-        missing_init_params.append(init_content)
-        content = b''.join(missing_init_params)
-        with open(self.pkg_init, 'wb') as f:
-            f.write(content)
-
-    def create_setup_file(self, readme, requirements):
+    def create_setup_file(self, readme, requirements, package_params):
         path = self.root + os.sep + 'setup.py'
         if not os.path.exists(path):
             content = b''.join([
@@ -212,21 +215,20 @@ class Create(Prep):
                 b'\n',
                 b'if __name__ == "__main__":\n',
                 b'    from sys import version_info as v\n',
-                b'    from ' + bytes(self.package_name, 'utf-8') + b' import __author__, __version__, __author_email__, __description__, __url__, __license__\n',
                 b'    from setuptools import setup, find_packages\n',
                 b'    with open("' + bytes(requirements.rsplit(os.sep, 1)[1], 'utf-8') + b'") as f: requirements = f.read().splitlines()\n',
                 b'    with open("' + bytes(readme.rsplit(os.sep, 1)[1], 'utf-8') + b'", encoding="utf8") as f: long_description = f.read()\n',
                 b'    setup(\n',
                 b'        name=package_name,\n',
-                b'        version=__version__,\n',
-                b'        author=__author__,\n',
-                b'        author_email=__author_email__,\n',
-                b'        description=__description__,\n',
+                b'        version=' + package_params['version'] + b',\n',
+                b'        author=' + package_params['author'] + b',\n',
+                b'        author_email=' + package_params['email'] + b',\n',
+                b'        description=' + package_params['description'] + b',\n',
                 b'        long_description=long_description,\n',
                 b'        long_description_content_type="text/markdown",\n',
-                b'        url=__url__,\n',
+                b'        url=' + package_params['url'] + b',\n',
                 b'        packages=[pkg for pkg in find_packages() if pkg.startswith(package_name)],\n',
-                b'        license=__license__,\n',
+                b'        license=' + package_params['license'] + b',\n',
                 b'        classifiers=[\n',
                 b'            f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
                 b'        ],\n',

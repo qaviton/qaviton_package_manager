@@ -12,14 +12,6 @@
 # language governing permissions and limitations under the License.
 
 
-__author__ = 'Qaviton'
-__version__ = "2019.9.4.15.20.9.643030"
-__author_email__ = 'info@qaviton.com'
-__description__ = 'a package manager for git projects with private repositories'
-__url__ = 'https://github.com/qaviton/qaviton_package_manager'
-__license__ = 'apache-2.0'
-
-
 from qaviton_package_manager.manager import Manager
 from qaviton_package_manager.utils.cryp import decypt, encrypt
 from qaviton_package_manager.utils.git_wrapper import Git

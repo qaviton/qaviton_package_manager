@@ -17,21 +17,20 @@ package_name = "qaviton_package_manager"
 
 if __name__ == "__main__":
     from sys import version_info as v
-    from qaviton_package_manager import __author__, __version__, __author_email__, __description__, __url__, __license__
     from setuptools import setup, find_packages
     with open("requirements.txt") as f: requirements = f.read().splitlines()
     with open("README.md", encoding="utf8") as f: long_description = f.read()
     setup(
         name=package_name,
-        version=__version__,
-        author=__author__,
-        author_email=__author_email__,
-        description=__description__,
+        version="2019.9.4.15.20.9.643030",
+        author="Qaviton",
+        author_email="info@qaviton.com",
+        description="a package manager for git projects with private repositories",
         long_description=long_description,
         long_description_content_type="text/markdown",
-        url=__url__,
+        url="https://github.com/qaviton/qaviton_package_manager",
         packages=[pkg for pkg in find_packages() if pkg.startswith(package_name)],
-        license=__license__,
+        license="apache-2.0",
         classifiers=[
             f"Programming Language :: Python :: {v[0]}.{v[1]}",
             "Operating System :: OS Independent",

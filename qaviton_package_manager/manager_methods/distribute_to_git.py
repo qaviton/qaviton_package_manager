@@ -62,19 +62,22 @@ class Build(Prep):
 
     def update_version(self, version):
         version = self.versioning(version)
-        content = self.get_pkg_init()
-        if b'\n__version__' not in content and not content.startswith(b'__version__'):
-            raise IOError("missing __version__ in the package __init__.py file")
-        lines = content.splitlines()
+        with open(self.setup_path, 'rb') as f:
+            lines = f.read().splitlines()
+
+        in_setup = False
         for i, line in enumerate(lines):
-            if line.startswith(b'__version__'):
-                line = line.split(b'=', 1)
-                line[0] = line[0].rstrip()
-                line[1] = f'"{version}"'.encode("utf-8")
-                lines[i] = b' = '.join(line)
-                break
-        with open(self.pkg_init, 'wb') as f:
-            lines.append(b'')
+            if line == b'setup(':
+                in_setup = True
+            elif in_setup:
+                if line.strip().startswith(b'version'):
+                    line = line.split(b'=', 1)
+                    line[0] = line[0].rstrip()
+                    line[1] = f'"{version}",'.encode("utf-8")
+                    lines[i] = b'='.join(line)
+                    break
+
+        with open(self.setup_path, 'wb') as f:
             f.write(b'\n'.join(lines))
         return version
 
