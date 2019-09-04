@@ -29,7 +29,11 @@ class Build(Prep):
         msg = f'build candidate {branch}'
         git.commit(msg)
         if git.has_remote():
-            git.pull()
+            try:
+                git.pull()
+            except:
+                git.create_remote()
+                git.pull()
 
         local_branches = git.get_local_branches()
         # remote_branches = [branch.split(b'/', 1)[1] for branch in git.get_remote_branches()]

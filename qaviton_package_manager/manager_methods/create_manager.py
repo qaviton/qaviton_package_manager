@@ -122,6 +122,7 @@ class Create(Prep):
         if not os.path.exists(path):
             print(f'{TESTS_DIR} not found\nP.S. you can change the default tests directory with qaviton_package_manager.conf.TESTS_DIR = "filename"')
             name = input(f'select TESTS_DIR filename({TESTS_DIR} default):')
+            if not name: name = TESTS_DIR
             path = self.root + os.sep + name
             if not os.path.exists(path):
                 os.mkdir(path)
