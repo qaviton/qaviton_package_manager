@@ -17,7 +17,7 @@ from abc import ABCMeta, abstractmethod
 # from urllib.parse import quote_plus as urlencode
 # from qaviton_package_manager.conf import supported_protocols
 from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
-from qaviton_package_manager.utils.git_wrapper import Git
+from qaviton_git import Git
 from qaviton_package_manager.utils.logger import log
 
 

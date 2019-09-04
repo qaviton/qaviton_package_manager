@@ -14,4 +14,4 @@
 
 from qaviton_package_manager.manager import Manager
 from qaviton_package_manager.utils.cryp import decypt, encrypt
-from qaviton_package_manager.utils.git_wrapper import Git
+from qaviton_git import Git

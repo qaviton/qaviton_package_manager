@@ -19,7 +19,7 @@ from qaviton_package_manager.conf import LICENSE, README, PACKAGE, GIT_IGNORE
 from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
 from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS, TESTS_DIR
 from qaviton_package_manager.utils.logger import log
-from qaviton_package_manager.utils.git_wrapper import Git
+from qaviton_git import Git
 from qaviton_package_manager.manager_methods import Prep
 from qaviton_package_manager.conf import ignore_list
 from qaviton_package_manager.utils.cryp import encrypt

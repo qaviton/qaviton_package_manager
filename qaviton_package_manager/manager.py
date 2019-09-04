@@ -14,7 +14,7 @@
 
 from sys import argv
 from traceback import format_exc
-from qaviton_package_manager.utils.git_wrapper import Git
+from qaviton_git import Git
 from qaviton_package_manager.manager_methods.create_manager import Create
 from qaviton_package_manager.manager_methods.install_requirements import Install, InstallTest
 from qaviton_package_manager.manager_methods.update_requirements import Update, UpdateTest

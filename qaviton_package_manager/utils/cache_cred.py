@@ -9,7 +9,7 @@ from traceback import format_exc
 from qaviton_helpers import try_to
 # from qaviton_package_manager.conf import ignore_list
 from qaviton_package_manager.utils.functions import find_free_port
-from qaviton_package_manager.utils.git_wrapper import get_root
+from qaviton_git.git_wrapper import get_root
 from qaviton_processes import python_code_async
 
 
