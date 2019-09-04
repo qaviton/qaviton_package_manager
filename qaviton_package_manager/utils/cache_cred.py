@@ -5,12 +5,12 @@ import psutil
 from uuid import uuid4
 from time import time, sleep
 from multiprocessing.connection import Listener, Client
-from qaviton_package_manager.utils.functions import find_free_port
 from traceback import format_exc
-from qaviton_package_manager.conf import ignore_list
+from qaviton_helpers import try_to
+# from qaviton_package_manager.conf import ignore_list
+from qaviton_package_manager.utils.functions import find_free_port
 from qaviton_package_manager.utils.git_wrapper import get_root
 from qaviton_package_manager.utils.system import pythonCIO
-from qaviton_package_manager.utils.functions import try_to
 
 
 class ServerDownError(ConnectionAbortedError):

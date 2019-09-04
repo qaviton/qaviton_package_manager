@@ -1,9 +1,9 @@
 import os
 # from urllib.parse import quote_plus as urlencode
+from qaviton_helpers import try_to, try_or_none
 from qaviton_package_manager.utils.system import run, bs
 from qaviton_package_manager.utils.logger import log
 from qaviton_package_manager.utils.system import escape
-from qaviton_package_manager.utils.functions import try_to, try_or_none
 
 
 def git(*args): return run('git', *args)

@@ -9,20 +9,6 @@ from qaviton_package_manager.utils.system import python
 def get_requirements(root): return root + os.sep + REQUIREMENTS
 def get_test_requirements(root): return root + os.sep + REQUIREMENTS_TESTS
 
-# TODO: import these, fix tests dir
-def try_to(f, *args, **kwargs):
-    try:
-        return f(*args, **kwargs)
-    except Exception as e:
-        return e
-
-
-def try_or_none(f, *args, **kwargs):
-    try:
-        return f(*args, **kwargs)
-    except:
-        return
-
 
 def clean_distibution():
     if os.path.exists('build'): shutil.rmtree('build')
