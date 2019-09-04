@@ -74,6 +74,7 @@ class Build(Prep):
                 lines[i] = b' = '.join(line)
                 break
         with open(self.pkg_init, 'wb') as f:
+            lines.append('')
             f.write(b'\n'.join(lines))
         return version
 
