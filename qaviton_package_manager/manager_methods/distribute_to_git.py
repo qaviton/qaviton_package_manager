@@ -67,7 +67,7 @@ class Build(Prep):
 
         in_setup = False
         for i, line in enumerate(lines):
-            if line == b'setup(':
+            if line.strip() == b'setup(':
                 in_setup = True
             elif in_setup:
                 a = line.strip()
