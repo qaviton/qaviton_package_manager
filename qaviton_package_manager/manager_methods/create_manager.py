@@ -284,4 +284,4 @@ if __name__ == "__main__":
                 lines = f.read().splitlines()
             with open(self.git_ignore, 'a') as f:
                 f.write('\n'+'\n'.join([line for line in ignore_list if line not in lines]))
-        log.info('added files to .gitignore file')
+        log.info('added content to .gitignore file')
