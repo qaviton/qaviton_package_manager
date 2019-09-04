@@ -18,17 +18,17 @@ from qaviton_package_manager.utils.functions import package_match
 
 class Remove(Clean):
     def run(self):
-        Clean.run(self)
-        if self.packages:
-            with open(self.requirements_path) as f:
-                requirements = f.readlines()
-            for i, line in enumerate(requirements):
-                requirement = line.replace(' ', '').replace('\n', '')
-                for removed in self.packages:
-                    if package_match(removed.replace(' ', ''), requirement):
-                        requirements[i] = None
-            with open(self.requirements_path, 'w') as f:
-                f.writelines([pkg for pkg in requirements if pkg is not None])
+        if Clean.run(self):
+            if self.packages:
+                with open(self.requirements_path) as f:
+                    requirements = f.readlines()
+                for i, line in enumerate(requirements):
+                    requirement = line.replace(' ', '').replace('\n', '')
+                    for removed in self.packages:
+                        if package_match(removed.replace(' ', ''), requirement):
+                            requirements[i] = None
+                with open(self.requirements_path, 'w') as f:
+                    f.writelines([pkg for pkg in requirements if pkg is not None])
 
 
 class RemoveTest(TestOperation, Remove):

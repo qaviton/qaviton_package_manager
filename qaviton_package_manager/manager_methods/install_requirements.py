@@ -23,30 +23,32 @@ class Install(ManagerOperation):
         if install_requirements:
             self.get_packages_from_requirements()
 
-        pip.install(*self.configure_packages())
+        packages = ' '.join(self.configure_packages())
+        if packages:
+            pip.install(packages)
 
-        # TODO: fix this, add check for version evaluation
-        # if not install_requirements and self.packages:
-        #     with open(self.requirements_path) as f:
-        #         packages = f.read().splitlines()
-        #     for i, package in enumerate(packages):
-        #         for added in self.packages:
-        #             if added == package:
-        #                 packages[i] = None
-        #     packages = [pkg for pkg in packages if pkg is not None]
-        #     if packages:
-        #         with open(self.requirements_path, 'a') as f:
-        #             f.write('\n'+'\n'.join(self.packages))
-        if self.packages:
-            with open(self.requirements_path) as f:
-                requirements = f.readlines()
-            for i, line in enumerate(requirements):
-                requirement = line.replace(' ', '').replace('\n', '')
-                for package in self.packages:
-                    if package_match(package.replace(' ', ''), requirement):
-                        requirements[i] = None
-            with open(self.requirements_path, 'w') as f:
-                f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
+            # TODO: fix this, add check for version evaluation
+            # if not install_requirements and self.packages:
+            #     with open(self.requirements_path) as f:
+            #         packages = f.read().splitlines()
+            #     for i, package in enumerate(packages):
+            #         for added in self.packages:
+            #             if added == package:
+            #                 packages[i] = None
+            #     packages = [pkg for pkg in packages if pkg is not None]
+            #     if packages:
+            #         with open(self.requirements_path, 'a') as f:
+            #             f.write('\n'+'\n'.join(self.packages))
+            if self.packages:
+                with open(self.requirements_path) as f:
+                    requirements = f.readlines()
+                for i, line in enumerate(requirements):
+                    requirement = line.replace(' ', '').replace('\n', '')
+                    for package in self.packages:
+                        if package_match(package.replace(' ', ''), requirement):
+                            requirements[i] = None
+                with open(self.requirements_path, 'w') as f:
+                    f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
 
 
 class InstallTest(TestOperation, Install):

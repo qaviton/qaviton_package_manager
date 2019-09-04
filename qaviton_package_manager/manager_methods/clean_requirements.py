@@ -21,7 +21,10 @@ class Clean(ManagerOperation):
         if len(self.packages) == 0 or self.packages[0] is None:
             self.get_packages_from_requirements()
 
-        pip.uninstall(*self.configure_packages())
+        packages = ' '.join(self.configure_packages())
+        if packages:
+            pip.uninstall(packages)
+            return True
 
 
 class CleanTest(TestOperation, Clean):
