@@ -14,9 +14,9 @@
 
 import datetime
 from qaviton_helpers import try_to
+from qaviton_processes import escape
 from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.manager_methods import Prep
-from qaviton_package_manager.utils.system import escape
 from qaviton_package_manager.utils.functions import get_package_name
 
 

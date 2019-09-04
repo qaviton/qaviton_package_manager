@@ -22,6 +22,5 @@ __license__ = 'apache-2.0'
 
 from qaviton_package_manager.manager import Manager
 from qaviton_package_manager.utils.cryp import decypt, encrypt
-from qaviton_package_manager.utils.git_wrapper import Git, git
+from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.pip_wrapper import pip
-from qaviton_package_manager.utils.system import escape, bs, run, runIO, python, pythonC, pythonCIO, pytest

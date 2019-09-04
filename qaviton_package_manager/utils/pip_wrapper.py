@@ -1,4 +1,4 @@
-from qaviton_package_manager.utils.system import run
+from qaviton_processes import run
 from sys import executable as python
 
 

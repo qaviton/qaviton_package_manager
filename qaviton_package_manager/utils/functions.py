@@ -2,8 +2,8 @@ import os
 import shutil
 import socket
 from contextlib import closing
+from qaviton_processes import python
 from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS
-from qaviton_package_manager.utils.system import python
 
 
 def get_requirements(root): return root + os.sep + REQUIREMENTS

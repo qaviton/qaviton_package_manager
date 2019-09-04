@@ -1,5 +1,5 @@
 from qaviton_package_manager.conf import TESTS_DIR
-from qaviton_package_manager.utils.system import run, python, pytest
+from qaviton_processes import run, python, pytest
 
 
 class Test(dict):

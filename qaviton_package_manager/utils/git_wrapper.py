@@ -1,12 +1,10 @@
 import os
 # from urllib.parse import quote_plus as urlencode
 from qaviton_helpers import try_to, try_or_none
-from qaviton_package_manager.utils.system import run, bs
+from qaviton_processes import run, bs, escape, git
 from qaviton_package_manager.utils.logger import log
-from qaviton_package_manager.utils.system import escape
 
 
-def git(*args): return run('git', *args)
 def get_root(): return bs(git('rev-parse --show-toplevel')).replace('/', os.sep)[:-2]
 
 

@@ -10,7 +10,7 @@ from qaviton_helpers import try_to
 # from qaviton_package_manager.conf import ignore_list
 from qaviton_package_manager.utils.functions import find_free_port
 from qaviton_package_manager.utils.git_wrapper import get_root
-from qaviton_package_manager.utils.system import pythonCIO
+from qaviton_processes import python_code_async
 
 
 class ServerDownError(ConnectionAbortedError):
@@ -133,7 +133,7 @@ class Cache:
 
     def create_server(self, cache_timeout, **kwargs):
         self.remove_file()
-        p = pythonCIO(
+        p = python_code_async(
             'from qaviton_package_manager.utils.cache_cred import Cache',
             'cache = Cache()',
             f'cache.server({cache_timeout}, **{kwargs})'
