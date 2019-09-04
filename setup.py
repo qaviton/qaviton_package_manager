@@ -30,7 +30,7 @@ if __name__ == "__main__":
         long_description=long_description,
         long_description_content_type="text/markdown",
         url=__url__,
-        packages=[pkg for pkg in find_packages() if pkg.startswith("qaviton_package_manager")],
+        packages=[pkg for pkg in find_packages() if pkg.startswith(package_name)],
         license=__license__,
         classifiers=[
             f"Programming Language :: Python :: {v[0]}.{v[1]}",
