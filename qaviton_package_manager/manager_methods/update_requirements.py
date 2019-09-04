@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from qaviton_package_manager.utils.pip_wrapper import pip
+from qaviton_pip import pip
 from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
 
 

@@ -12,8 +12,8 @@
 # language governing permissions and limitations under the License.
 
 
+from qaviton_pip import pip
 from qaviton_package_manager.utils.functions import upload_to_pypi, get_package_name
-from qaviton_package_manager.utils.pip_wrapper import pip
 
 
 class Upload:

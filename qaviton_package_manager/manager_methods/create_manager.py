@@ -13,11 +13,11 @@
 
 
 import os
+from qaviton_pip import pip
 from qaviton_package_manager.utils.git_wrapper import RepoData
 from qaviton_package_manager.conf import LICENSE, README
 from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
 from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS, TESTS_DIR
-from qaviton_package_manager.utils.pip_wrapper import pip
 from qaviton_package_manager.utils.logger import log
 # from qaviton_package_manager.utils.system import escape
 from qaviton_package_manager.utils.git_wrapper import Git

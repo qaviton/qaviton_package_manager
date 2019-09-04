@@ -1,6 +1,6 @@
 # import time
 from urllib.parse import quote_plus as urlencode
-from qaviton_package_manager.utils.pip_wrapper import pip
+from qaviton_pip import pip
 # from qaviton_package_manager.utils.git_wrapper import Git
 from qaviton_package_manager.utils.cache_cred import Cache
 from package import manager
