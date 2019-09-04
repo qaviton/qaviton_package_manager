@@ -225,7 +225,7 @@ class Create(Prep):
                 b'        long_description=long_description,\n',
                 b'        long_description_content_type="text/markdown",\n',
                 b'        url=__url__,\n',
-                b'        packages=[pkg for pkg in find_packages() if pkg.startswith("' + bytes(self.package_name, 'utf-8') + b'")],\n',
+                b'        packages=[pkg for pkg in find_packages() if pkg.startswith(package_name)],\n',
                 b'        license=__license__,\n',
                 b'        classifiers=[\n',
                 b'            f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
