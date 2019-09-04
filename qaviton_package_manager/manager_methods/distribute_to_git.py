@@ -70,6 +70,7 @@ class Build(Prep):
             if line == b'setup(':
                 in_setup = True
             elif in_setup:
+                a = line.strip()
                 if line.strip().startswith(b'version'):
                     line = line.split(b'=', 1)
                     line[0] = line[0].rstrip()
