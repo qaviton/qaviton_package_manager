@@ -42,7 +42,11 @@ pip install --upgrade qaviton_package_manager
 * pypi capabilities ✓  
 * automatic builds ✓  
 * secure credentials ✓  
-* crossplatform ✓    
+* crossplatform ✓  
+* nested/multiple packages ✗  
+* pip -e installs ✗ (coming soon)  
+* docker build ✗ (but can be used with the run function)  
+* docker push ✗ (but can be used with the run function)  
   
 ## Usage  
   
@@ -143,7 +147,7 @@ python package.py --test "system" "echo success" --test "python" "-c" "print(\"p
 #### Script:  
 ```python
 # ci_cd.py
-from qaviton_package_manager import run, escape, python
+from qaviton_processes import run, escape, python
 from package import manager
 from datetime import datetime
 
@@ -177,7 +181,7 @@ manager.run(
 # schedualer.py
 from time import time, sleep
 from datetime import datetime, timedelta
-from qaviton_package_manager import pythonCIO
+from qaviton_processes import python_code_async
 
 d = datetime.utcnow()
 date = datetime(year=d.year, month=d.month, day=d.day, hour=22)
@@ -185,17 +189,12 @@ delta = timedelta(days=1)
 
 # build a package once a day at 22pm
 while True:
-    pythonCIO('import ci_cd')
+    python_code_async('import ci_cd')
     date += delta
     sleep(date.timestamp()-time())
     
 ```  
   
-## not yet supported  
-* pip -e installs  
-* nested packages (might not get supported)  
-* docker build (but can be used with the run function)  
-* docker push (but can be used with the run function)  
   
 ## warnings  
 * this manager is meant for automated ci cd purposes  
