@@ -1,4 +1,4 @@
-# qaviton_package_manager
+# Qaviton Package Manager
 -------------------------  
 
 ![qaviton](https://www.qaviton.com/wp-content/uploads/logo-svg.svg)  
