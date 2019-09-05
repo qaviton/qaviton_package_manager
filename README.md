@@ -5,9 +5,7 @@
 [![downloads](https://img.shields.io/pypi/dm/qaviton_package_manager.svg)](https://pypi.python.org/pypi)
 ![code size](https://img.shields.io/github/languages/code-size/qaviton/qaviton_package_manager)
 -------------------------  
-.. image:: https://img.shields.io/pypi/v/pytest-asyncio.svg
-    :target: https://pypi.python.org/pypi/pytest-asyncio
-    
+  
 Tired of redundant packaging systems for your software?  
 qaviton is here to help!  
 we can package everything into simple  
