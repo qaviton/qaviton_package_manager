@@ -22,7 +22,7 @@ if __name__ == "__main__":
     with open("README.md", encoding="utf8") as f: long_description = f.read()
     setup(
         name=package_name,
-        version="2019.9.5.13.29.31.443389",
+        version="2019.9.5.13.33.53.832082",
         author="Qaviton",
         author_email="info@qaviton.com",
         description="a package manager for git projects with private repositories",
