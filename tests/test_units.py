@@ -59,9 +59,12 @@ def test_cache():
         'pooki': 'pokol',
     }
     cache = Cache()
-
-    response = cache.post(**server_cached_data)
-    assert response == {}
+    if cache.server_is_alive():
+        response = cache.post(**server_cached_data)
+        assert response == {}
+    else:
+        cache_timeout = 30
+        cache.create_server(cache_timeout, **server_cached_data)
 
     response = cache.get(*server_cached_data.keys())
     assert response == server_cached_data
