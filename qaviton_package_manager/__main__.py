@@ -15,18 +15,21 @@
 def main():
     from os.path import exists
     from os import getcwd, sep
-    from sys import path
     root = getcwd()
     pkg = root+sep+'package.py'
     if exists(pkg):
-        if root not in path:
-            path.append(root)
-        manager = __import__('package', globals(), locals(), ['manager'], 0)
-        manager.run()
-        return manager
-    else:
-        from qaviton_package_manager.manager import Manager
-        return Manager().run()
+        from qaviton_helpers import import_path
+        try:
+            manager = import_path(pkg).manager
+        except Exception as e:
+            from qaviton_package_manager.utils.logger import log
+            log.warning(e)
+            log.info(f"could not retrieve 'manager' parameter from {pkg}")
+            log.info("creating a new manager")
+        else:
+            return manager.run()
+    from qaviton_package_manager.manager import Manager
+    return Manager().run()
 
 
 if __name__ == '__main__':
