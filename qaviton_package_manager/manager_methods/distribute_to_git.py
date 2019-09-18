@@ -54,10 +54,10 @@ class Build(Prep):
         print('you can now install this package:')
         print('   1) go to another project with git (make sure you have permissions)')
         print('   2) pip install qaviton_package_manager')
-        print('   3) python -m qaviton_package_manager --create --url "x" --username "x" --password "x" --email "x" --pypi_user "x" --pypi_pass "x"')
-        print(f'   4) python -m qaviton_package_manager --install "{escape(req)}"')
+        print('   3) qpm --create --url "x" --username "x" --password "x" --email "x" --pypi_user "x" --pypi_pass "x"')
+        print(f'   4) qpm --install "{escape(req)}"')
         print("or if you want the latest version:")
-        print(f'   4) python -m qaviton_package_manager --install "{escape(latest)}"')
+        print(f'   4) qpm --install "{escape(latest)}"')
         try_to(git, f'checkout -f {current_branch}')
 
     def update_version(self, version):
