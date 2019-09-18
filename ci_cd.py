@@ -8,7 +8,7 @@ if __name__ == "__main__":
     working_branch = git.get_current_branch()
 
     manager.run(
-        lambda: manager.should_build(from_branch=build_branch, to_branch=release_branch),
+        # lambda: manager.should_build(from_branch=build_branch, to_branch=release_branch),
         lambda: manager.update(),
         lambda: manager.update_test(),
         # lambda: manager.test(),
