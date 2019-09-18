@@ -15,7 +15,12 @@
 def main():
     from os.path import exists
     from os import getcwd, sep
-    if exists(getcwd()+sep+'package.py'):
+    from sys import path
+    root = getcwd()
+    pkg = root+sep+'package.py'
+    if exists(pkg):
+        if root not in path:
+            path.append(root)
         manager = __import__('package', globals(), locals(), ['manager'], 0)
         manager.run()
         return manager
