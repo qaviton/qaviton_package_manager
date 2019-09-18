@@ -13,5 +13,5 @@
 
 
 from qaviton_package_manager.manager import Manager
-def main(): Manager().run()
+def main(): return Manager().run()
 if __name__ == '__main__': main()

@@ -139,7 +139,7 @@ class Manager:
             for key in self._ord:
                 if hasattr(self, key):
                     self._run(getattr(self, key), *self.kwargs[key])
-
+        return self
     def create(self, package_name=None): Create(self.git, self.vars['pypi_user'], self.vars['pypi_pass'], package_name); return self
     def install(self, *packages): Install(self.git, *packages); return self
     def install_test(self, *packages): InstallTest(self.git, *packages); return self

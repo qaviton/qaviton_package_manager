@@ -55,7 +55,7 @@ pip install --upgrade qaviton_package_manager
   
 #### creating a manager:  
 ```
-(venv) windows> python -m qaviton_package_manager ^
+(venv) windows> qpm ^
 --create ^
 --url "https://github.com/owner/project.git" ^
 --username "user1" ^
@@ -65,7 +65,7 @@ pip install --upgrade qaviton_package_manager
 --pypi_pass "final space" 
 ```  
 ```bash
-(venv) bash$ python -m qaviton_package_manager  \
+(venv) bash$ qpm  \
 --create  \
 --url "https://github.com/owner/project.git"  \
 --username "user1"  \
@@ -132,19 +132,19 @@ python package.py
 we can call any method and send any parameter to the manager through cli:
 ```bash
 # release a version if all tests pass
-python package.py --username "" --password "" --update --update_test --test --build --upload
+qpm --username "" --password "" --update --update_test --test --build --upload
 
 # build a stable version if all tests pass
-python package.py --username "" --password "" --update --update_test --test --build "stable/latest"
+qpm --username "" --password "" --update --update_test --test --build "stable/latest"
 
 # install cachetools using pip and save the requirement in requirements.txt
-python package.py --install cachetools
+qpm --install cachetools
 
 # cache credentials in memory
-python package.py --username "" --password "" --cache_timeout "-1"
+qpm --username "" --password "" --cache_timeout "-1"
 
 # using the system & python to execute tests
-python package.py --test "system" "echo success" --test "python" "-c" "print(\"py success\");"
+qpm --test "system" "echo success" --test "python" "-c" "print(\"py success\");"
 ```  
   
 #### Script:  

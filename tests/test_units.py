@@ -79,3 +79,11 @@ def test_cache():
 #     assert git.username == manager.git.username
 #     assert git.password == manager.git.password
 #     assert git.email == manager.git.email
+
+
+def test_cli():
+    from package import manager
+    from qaviton_package_manager.cli import command_line
+    manager.vars['123'] = True
+    manager = command_line()
+    assert '123' in manager.vars
