@@ -13,10 +13,9 @@
 
 
 def main():
-    from os import getcwd, path, sep
-    pkg = getcwd()+sep+'package.py'
-    if path.exists(pkg):
-        manager = __import__(pkg, globals(), locals(), ['manager'], 0)
+    from os.path import exists
+    if exists('package'):
+        manager = __import__('package', globals(), locals(), ['manager'], 0)
         manager.run()
         return manager
     else:
