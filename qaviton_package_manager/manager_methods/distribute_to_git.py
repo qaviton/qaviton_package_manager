@@ -49,8 +49,8 @@ class Build(Prep):
         git.push(git.url, to_branch)
 
         # git.switch(branch).create_remote()
-        req = f'git+{git.url}@{branch}'
-        latest = f'git+{git.url}@{to_branch}'
+        req = f'git+{git.url}@{branch}#egg={self.package_name}'
+        latest = f'git+{git.url}@{to_branch}#egg={self.package_name}'
         print('you can now install this package:')
         print('   1) go to another project with git (make sure you have permissions)')
         print('   2) pip install qaviton_package_manager')

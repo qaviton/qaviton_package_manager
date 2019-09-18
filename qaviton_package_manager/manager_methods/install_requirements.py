@@ -11,7 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-
+from tempfile import TemporaryDirectory
 from qaviton_pip import pip
 from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
 from qaviton_package_manager.utils.functions import package_match
@@ -24,6 +24,12 @@ class Install(ManagerOperation):
             self.get_packages_from_requirements()
 
         packages = ' '.join(self.configure_packages())
+
+        # vcs_packages = {pkg.rsplit('#egg=', 1)[1]: pkg for i, pkg in enumerate(packages) if '#egg=' in pkg}
+        # if vcs_packages:
+        #     packages = [pkg for pkg in packages if '#egg=' not in pkg]
+        #     with TemporaryDirectory() as tmp:
+        #         self.git.clone()
         if packages:
             pip.install(packages)
 

@@ -24,7 +24,7 @@ release/2019.9.2.0.39.13.173494
 release/latest
 ```  
 you can now install this package:  
-```pip install git+https://github.com/owner/package.git@release/latest```  
+```pip install git+https://github.com/owner/package.git@release/latest#egg=package```  
   
 ## Installation  
 ```sh  
