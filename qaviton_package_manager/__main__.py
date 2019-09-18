@@ -13,7 +13,6 @@
 
 
 from qaviton_package_manager.manager import Manager
-
-
+main = lambda: Manager().run()
 if __name__ == '__main__':
-    Manager().run()
+    main()

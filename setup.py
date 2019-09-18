@@ -30,6 +30,7 @@ if __name__ == "__main__":
         long_description_content_type="text/markdown",
         url="https://github.com/qaviton/qaviton_package_manager",
         packages=[pkg for pkg in find_packages() if pkg.startswith(package_name)],
+        scripts=['bin/qpm.py'],
         license="apache-2.0",
         classifiers=[
             f"Programming Language :: Python :: {v[0]}.{v[1]}",
