@@ -193,7 +193,7 @@ class Create(Prep):
 
         if b'\n__url__' not in tmp:
             log.warning(f'missing __url__ in init file')
-            package_params['url'] = b'"' + escape(self.git.url).encode('utf-8') + b'"'
+            package_params['url'] = b'"' + escape(self.git.url.replace('.git', '')).encode('utf-8') + b'"'
         else:
             package_params['url'] = tmp.split(b'\n__url__', 1)[1].split(b'=', 1)[1].split(b'\n', 1)[0].strip()
 
