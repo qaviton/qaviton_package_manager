@@ -14,7 +14,8 @@
 
 def main():
     from os.path import exists
-    if exists('package'):
+    from os import getcwd, sep
+    if exists(getcwd()+sep+'package.py'):
         manager = __import__('package', globals(), locals(), ['manager'], 0)
         manager.run()
         return manager
