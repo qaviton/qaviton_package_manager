@@ -45,7 +45,7 @@ class Build(Prep):
             git.pull()
             git(f'rebase {current_branch}')
 
-        git.tag(f'{branch}', msg)
+        git.tag(version, msg)
         git.push(git.url, to_branch)
 
         # git.switch(branch).create_remote()
