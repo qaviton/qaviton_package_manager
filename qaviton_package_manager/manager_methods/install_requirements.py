@@ -11,10 +11,12 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+from os import sep
 from tempfile import TemporaryDirectory
 from qaviton_pip import pip
 from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
 from qaviton_package_manager.utils.functions import package_match
+from qaviton_package_manager.utils.logger import log
 
 
 class Install(ManagerOperation):
@@ -25,11 +27,36 @@ class Install(ManagerOperation):
 
         packages = ' '.join(self.configure_packages())
 
-        # vcs_packages = {pkg.rsplit('#egg=', 1)[1]: pkg for i, pkg in enumerate(packages) if '#egg=' in pkg}
+        # vcs_packages = {pkg.rsplit('#egg=', 1)[1]: {'link':pkg} for i, pkg in enumerate(packages) if 'git+' in pkg and '#egg=' in pkg}
+        # for i, pkg in enumerate(packages):
+        #     if 'git+' in pkg or '#egg=' in pkg:
+        #         if 'git+' not in pkg or '#egg=' not in pkg:
+        #             raise ValueError(
+        #                 "we detected an unsupported vcs installation\n"
+        #                 "please view the supported vcs formats of pip here:\n"
+        #                 "https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support\n\n"
+        #                 "out of those, we dont support git://git.example.com/MyProject#egg=MyProject\n"
+        #                 "our format is as follows: git+protocol://git.example.com/MyProject.git@#egg=MyProject\n")
+        #
         # if vcs_packages:
-        #     packages = [pkg for pkg in packages if '#egg=' not in pkg]
+        #     packages = [pkg for pkg in packages if 'git+' not in pkg]
         #     with TemporaryDirectory() as tmp:
-        #         self.git.clone()
+        #         for name, pkg in vcs_packages.items():
+        #             if pip.exist(name):
+        #                 log.info(f'{name} from {pkg["link"]} requirement already satisfied')
+        #             else:
+        #                 try:
+        #                     pkg['url'] = pkg['link'].split('git+', 1)[1].rsplit('#egg=', 1)[0]
+        #                     .rsplit('@', 1)[0]
+        #                 except Exception as e:
+        #                     log.error("bad ")
+        #                 self.git.clone(
+        #                     path=tmp+sep+name,
+        #                     url=url.replace('git+', '', 1),
+        #                     username=self.git.username,
+        #                     password=self.git.password,
+        #                     email=self.git.email)
+
         if packages:
             pip.install(packages)
 
