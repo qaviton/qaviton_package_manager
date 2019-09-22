@@ -12,7 +12,7 @@ if __name__ == "__main__":
         # lambda: manager.update(),
         # lambda: manager.update_test(),
         # lambda: manager.test(),
-        manager.build(to_branch='dev/latest')
+        manager.build(to_branch='tests/latest')
         # lambda: manager.build(release_branch),
         # lambda: manager.upload(),
         # lambda: git.push(),
