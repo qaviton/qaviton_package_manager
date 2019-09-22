@@ -134,13 +134,20 @@ class PackageManager:
             cls.installed.__setitem__(*i.split('=='))
         return cls(packages)
 
+    def __enter__(self):
+        PackageManager.tmp = TemporaryDirectory()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        PackageManager.tmp.cleanup()
+
     def __init__(self, packages: [str], parent: str = None):
         self.packages_to_clone: List[Package] = []
         self.parent = parent
         for pkg in packages:
             self.add_package(pkg)
 
-    def _clone_packages(self):
+    def clone_packages(self):
         tmp = PackageManager.tmp
         vcs_packages: List[Package] = self.packages_to_clone
 
@@ -173,14 +180,6 @@ class PackageManager:
                 requirements.append('')
                 with open(pkg.requirements_path, encoding='utf-8', mode='w') as f:
                     f.write('\n'.join(requirements))
-
-    def clone_packages(self):
-        if PackageManager.tmp is None:
-            with TemporaryDirectory() as tmp:
-                PackageManager.tmp = tmp
-                self._clone_packages()
-            PackageManager.tmp = None
-        else: self._clone_packages()
 
     def add_package(self, uri: str, **kwargs):
         if 'git+' in uri or '#egg=' in uri:
@@ -270,38 +269,39 @@ class Install(ManagerOperation):
             self.get_packages_from_requirements()
 
         packages = self.configure_packages()
-        manager = PackageManager.init(self.git, packages)
-        if manager.vcs_packages:
-            manager.clone_packages()
 
-        if packages:
-            pip.install(manager.pip_packages)
+        with PackageManager.init(self.git, packages) as manager:
+            if manager.vcs_packages:
+                manager.clone_packages()
 
-            # TODO: fix this, add check for version evaluation
-            # if not install_requirements and self.packages:
-            #     with open(self.requirements_path) as f:
-            #         packages = f.read().splitlines()
-            #     for i, package in enumerate(packages):
-            #         for added in self.packages:
-            #             if added == package:
-            #                 packages[i] = None
-            #     packages = [pkg for pkg in packages if pkg is not None]
-            #     if packages:
-            #         with open(self.requirements_path, 'a') as f:
-            #             f.write('\n'+'\n'.join(self.packages))
-            if self.packages:
-                with open(self.requirements_path) as f:
-                    requirements = f.readlines()
-                for i, line in enumerate(requirements):
-                    requirement = line.replace(' ', '').replace('\n', '')
-                    for package in self.packages:
-                        if package_match(package.replace(' ', ''), requirement):
-                            requirements[i] = None
-                with open(self.requirements_path, 'w') as f:
-                    f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
+            if packages:
+                pip.install(manager.pip_packages)
 
-        if manager.vcs_packages:
-            manager.install_vcs_packages()
+                # TODO: fix this, add check for version evaluation
+                # if not install_requirements and self.packages:
+                #     with open(self.requirements_path) as f:
+                #         packages = f.read().splitlines()
+                #     for i, package in enumerate(packages):
+                #         for added in self.packages:
+                #             if added == package:
+                #                 packages[i] = None
+                #     packages = [pkg for pkg in packages if pkg is not None]
+                #     if packages:
+                #         with open(self.requirements_path, 'a') as f:
+                #             f.write('\n'+'\n'.join(self.packages))
+                if self.packages:
+                    with open(self.requirements_path) as f:
+                        requirements = f.readlines()
+                    for i, line in enumerate(requirements):
+                        requirement = line.replace(' ', '').replace('\n', '')
+                        for package in self.packages:
+                            if package_match(package.replace(' ', ''), requirement):
+                                requirements[i] = None
+                    with open(self.requirements_path, 'w') as f:
+                        f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
+
+            if manager.vcs_packages:
+                manager.install_vcs_packages()
 
 
 class InstallTest(TestOperation, Install):
