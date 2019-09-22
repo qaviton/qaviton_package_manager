@@ -123,8 +123,9 @@ class PackageManager:
     vcs_packages: Dict[str, Package] = {}
     vcs_ord = []
     pip_packages = []
-    git = None
-    tmp = None
+    git: Git
+    tmp: str
+    _tmp: TemporaryDirectory
     # satisfied = []
 
     @classmethod
@@ -135,11 +136,12 @@ class PackageManager:
         return cls(packages)
 
     def __enter__(self):
-        PackageManager.tmp = TemporaryDirectory()
+        PackageManager._tmp = TemporaryDirectory()
+        PackageManager.tmp = PackageManager._tmp.name
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        PackageManager.tmp.cleanup()
+        PackageManager._tmp.cleanup()
 
     def __init__(self, packages: [str], parent: str = None):
         self.packages_to_clone: List[Package] = []
