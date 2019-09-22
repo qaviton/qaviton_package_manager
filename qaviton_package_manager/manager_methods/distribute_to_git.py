@@ -25,8 +25,7 @@ class Build(Prep):
         self.package_name = get_package_name()
         Prep.__init__(self, git, self.package_name)
         version = self.update_version(version)
-        branch = f'{to_branch.rsplit("/", 1)[0]}/{version}'
-        msg = f'build candidate {branch}'
+        msg = f'build candidate {version}'
         git.commit(msg)
         if git.has_remote():
             try:
@@ -49,7 +48,7 @@ class Build(Prep):
         git.push(git.url, to_branch)
 
         # git.switch(branch).create_remote()
-        req = f'git+{git.url}@{branch}#egg={self.package_name}'
+        req = f'git+{git.url}@{to_branch}#egg={self.package_name}:=={version}'
         latest = f'git+{git.url}@{to_branch}#egg={self.package_name}'
         print('you can now install this package:')
         print('   1) go to another project with git (make sure you have permissions)')
