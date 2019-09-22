@@ -162,7 +162,7 @@ class PackageManager:
 
             # manage sub requirements
             requirements_manager = PackageManager(requirements)
-            if requirements_manager.vcs_packages:
+            if requirements_manager.packages_to_clone:
                 requirements_manager.clone_packages()
 
                 # update requirements (wheel cannot be created otherwise)
