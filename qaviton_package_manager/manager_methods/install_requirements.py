@@ -11,9 +11,10 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from typing import Dict
+from typing import Dict, List
 from os import sep, listdir
-from pkginfo import get_metadata
+from os.path import exists
+# from pkginfo import get_metadata
 from tempfile import TemporaryDirectory
 from qaviton_pip import pip
 from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
@@ -22,6 +23,24 @@ from qaviton_package_manager.utils.logger import log
 from qaviton_processes import run
 from sys import executable
 from qaviton_git import Git
+from qaviton_package_manager.exceptions import RepositoryMissMatchError
+
+
+invalid_package_chars = '=,!~<>'
+def get_package_name_from_requirement(requirement: str):
+    version = None
+    for i, c in enumerate(requirement):
+        if c in invalid_package_chars:
+            name = requirement[:i]
+            for i, c in enumerate(requirement, start=i):
+                if c not in invalid_package_chars:
+                    version = requirement[i:]
+                    break
+            return name, version
+
+
+def normalize_package_name(name):
+    return name.replace('_', '-').replace('.', '-').lower()
 
 
 class Package:
@@ -35,8 +54,12 @@ class Package:
         self.version: str = None
         self.versions: [str] = None
         self.name: str = None
+        self.normalized_name: str = None
         self.parent: str = None
+        self.repo: Git = None
         self.path: str = None
+        self.dist_path: str = None
+        self.requirements_path: str = None
         for attr, value \
         in kwargs.items():
             self[attr] = value
@@ -51,106 +74,115 @@ class Package:
         object.__setattr__(self, key, value)
         self._attr[key] = value
 
+    def get_dependency_tree(self):
+        pkg = self
+        tree = []
+        while pkg.parent:
+            pkg = PackageManager.vcs_packages[pkg.parent]
+            tree.append(pkg.link)
+        return tree
+
+    def set_paths(self, tmp):
+        self.path = tmp + sep + self.name
+        self.requirements_path = self.path + sep + 'requirements.txt'
+        self.dist_path = self.path + sep + 'dist'
+
+    def clone(self):
+        self.repo = PackageManager.git.clone(
+            path=self.path,
+            url=self.url,
+            username=PackageManager.git.username,
+            password=PackageManager.git.password,
+            email=PackageManager.git.email)
+
+    def set_version(self):
+        self.versions = sorted(self.repo('tag --merged').decode('utf-8').splitlines())
+
+        # get version
+        if self.version:
+            # TODO: filter out the highest version
+            # version =
+            # repo(f'checkout tags/{version}')
+            self.version = self.versions[-1]
+        else:
+            self.version = self.versions[-1]
+
+    def get_requirements(self):
+        try:
+            with open(self.requirements_path, encoding='utf-8') as f:
+                requirements = f.read().splitlines()
+            return requirements
+        except FileNotFoundError as e:
+            log.error(e)
+            log.error(f"{self.name} from {self.link} is missing requirements.txt file")
+            raise FileNotFoundError("")
+
 
 class PackageManager:
-    installed = None
+    installed = {}
+    vcs_packages: Dict[str, Package] = {}
+    vcs_ord = []
+    pip_packages = []
     git = None
+    tmp = None
+    # satisfied = []
 
     @classmethod
     def init(cls, git: Git, packages: [str]):
-        cls.installed = pip('freeze').decode('utf-8').splitlines()
         cls.git = git
+        for i in pip('freeze').decode('utf-8').splitlines():
+            cls.installed.__setitem__(*i.split('=='))
         return cls(packages)
 
-    def __init__(self, packages: [str]):
-        self.packages = packages
-        self.vcs_packages: Dict[str, Package] = {}
+    def __init__(self, packages: [str], parent: str = None):
+        self.packages_to_clone: List[Package] = []
+        self.parent = parent
+        for pkg in packages:
+            self.add_package(pkg)
 
-        for pkg in packages: self.create_package_dict(pkg)
-        if self.vcs_packages: self.pip_packages = [pkg for pkg in self.packages if 'git+' not in pkg]
-        else: self.pip_packages = packages
+    def _clone_packages(self):
+        tmp = PackageManager.tmp
+        vcs_packages: List[Package] = self.packages_to_clone
 
-    def install_vcs(self):
-        with TemporaryDirectory() as tmp:
-            for name, pkg in self.vcs_packages.items():
+        for pkg in vcs_packages:
+            pkg.set_paths(tmp)
 
-                # filter satisfied requirements
-                for i in PackageManager.installed:
-                    ins, ver = i.split('==')
-                    if ins == name.replace('_', '-'):
-                        # lines = r.splitlines()
-                        # version = None
-                        # for line in lines:
-                        #     v = b'Version: '
-                        #     if line.startswith(v):
-                        #         version = line[len(v):]
-                        #         break
-                        #
-                        log.info(f'{i} requirement from {pkg.link} already satisfied')
-                        break
-                else:
-                    # clone repo
-                    pkg.path = tmp + sep + name
-                    repo = PackageManager.git.clone(
-                        path=pkg.path,
-                        url=pkg.url,
-                        username=PackageManager.git.username,
-                        password=PackageManager.git.password,
-                        email=PackageManager.git.email)
-                    pkg.versions = sorted(repo('tag --merged').decode('utf-8').splitlines())
+            if pkg.normalized_name in PackageManager.installed:
+                continue
 
-                    # get version
-                    if pkg.version:
-                        # TODO: filter out the highest version
-                        # version =
-                        # repo(f'checkout tags/{version}')
-                        pkg.version = pkg.versions[-1]
-                    else:
-                        pkg.version = pkg.versions[-1]
+            if exists(pkg.path):
+                continue
 
-                    # get requirements
-                    try:
-                        requirements_path = pkg.path + sep + 'requirements.txt'
-                        with open(requirements_path, encoding='utf-8') as f:
-                            requirements = f.read().splitlines()
+            # clone repo
+            pkg.clone()
+            pkg.set_version()
 
-                        # manage sub requirements
-                        requirements_manager = PackageManager(list(requirements))
-                        if requirements_manager.vcs_packages:
-                            requirements_manager.install_vcs()
+            # get requirements
+            requirements = pkg.get_requirements()
 
-                            # update requirements (wheel cannot be created otherwise)
-                            for requirements_pkg in requirements_manager.vcs_packages.values():
-                                for i, requirement in enumerate(requirements):
-                                    if requirements_pkg.link == requirement:
-                                        requirements[i] = f'{requirements_pkg.name}=={requirements_pkg.version}'
-                            requirements.append('')
-                            with open(requirements_path, encoding='utf-8', mode='w') as f:
-                                f.write('\n'.join(requirements))
+            # manage sub requirements
+            requirements_manager = PackageManager(requirements)
+            if requirements_manager.vcs_packages:
+                requirements_manager.clone_packages()
 
-                    except FileNotFoundError as e:
-                        log.error(e)
-                        log.error(f"{pkg.name} from {pkg.link} is missing requirements.txt file")
-                        raise FileNotFoundError("")
+                # update requirements (wheel cannot be created otherwise)
+                for requirements_pkg in requirements_manager.vcs_packages.values():
+                    for i, requirement in enumerate(requirements):
+                        if requirements_pkg.link == requirement:
+                            requirements[i] = f'{requirements_pkg.name}=={requirements_pkg.version}'
+                requirements.append('')
+                with open(pkg.requirements_path, encoding='utf-8', mode='w') as f:
+                    f.write('\n'.join(requirements))
 
-                    # create wheel
-                    run('cd', pkg.path, '&&', executable, 'setup.py bdist_wheel --universal')
-                    dist = pkg.path + sep + 'dist'
-                    for fn in listdir(dist):
-                        if fn.endswith('.whl'):
-                            wheel = dist + sep + fn
-                            pip.install(wheel)
-                            # print(get_metadata(wheel).requires_dist)
-                            break
+    def clone_packages(self):
+        if PackageManager.tmp is None:
+            with TemporaryDirectory() as tmp:
+                PackageManager.tmp = tmp
+                self._clone_packages()
+            PackageManager.tmp = None
+        else: self._clone_packages()
 
-    def get_dependency_tree(self, pkg: dict):
-        tree = []
-        while pkg.parent:
-            tree.append(pkg.parent)
-            pkg = self.vcs_packages[pkg.parent]
-        return tree
-
-    def create_package_dict(self, uri: str, **kwargs):
+    def add_package(self, uri: str, **kwargs):
         if 'git+' in uri or '#egg=' in uri:
             error = ValueError(
                 f"we detected an unsupported vcs installation:{uri}\n"
@@ -173,7 +205,7 @@ class PackageManager:
                 else:
                     name, version = b[1], []
 
-                self.vcs_packages[name] = Package(**{
+                pkg = Package(**{
                     'link': uri,
                     'url': c[0] + '.git',
                     'branch': c[1],
@@ -182,12 +214,53 @@ class PackageManager:
                     'version': version,
                     'versions': [],
                     'name': name,
-                    'parent': None,
+                    'normalized_name': normalize_package_name(name),
+                    'parent': self.parent,
                     'path': None,
                     **kwargs,
                 })
-            except:
-                raise error
+            except: raise error
+
+            if name in PackageManager.vcs_packages:
+                pkg2 = PackageManager.vcs_packages[name]
+                if uri != pkg.link:
+                    tree = pkg.get_dependency_tree()
+                    tree2 = pkg2.get_dependency_tree()
+                    raise RepositoryMissMatchError(
+                        f"{pkg.name} is requested from 2 different places:\n"
+                        f"{' --> '.join(tree2)}\n"
+                        f"{' --> '.join(tree)}\n"
+                    )
+                PackageManager.vcs_ord.pop(PackageManager.vcs_ord.index(name))
+                PackageManager.vcs_ord.append(name)
+
+            elif pkg.normalized_name not in PackageManager.installed:
+                PackageManager.vcs_packages[name] = pkg
+                PackageManager.vcs_ord.append(name)
+                self.packages_to_clone.append(pkg)
+
+        elif uri not in PackageManager.pip_packages:
+            PackageManager.pip_packages.append(uri)
+
+    def install_vcs_packages(self):
+        for name in reversed(PackageManager.vcs_ord):
+            pkg = PackageManager.vcs_packages[name]
+
+            # if pkg.link in PackageManager.satisfied:
+            #     PackageManager.satisfied.append(pkg.link)
+            #     log.info(f'{pkg.link} requirement already satisfied -> {name}=={PackageManager.installed[name]}')
+            #     continue
+            # else:
+
+            # create wheel
+            run('cd', pkg.path, '&&', executable, 'setup.py bdist_wheel --universal')
+            dist = pkg.path + sep + 'dist'
+            for fn in listdir(dist):
+                if fn.endswith('.whl'):
+                    wheel = dist + sep + fn
+                    pip.install(wheel)
+                    # print(get_metadata(wheel).requires_dist)
+                    break
 
 
 class Install(ManagerOperation):
@@ -199,7 +272,7 @@ class Install(ManagerOperation):
         packages = self.configure_packages()
         manager = PackageManager.init(self.git, packages)
         if manager.vcs_packages:
-            manager.install_vcs()
+            manager.clone_packages()
 
         if packages:
             pip.install(manager.pip_packages)
@@ -226,6 +299,9 @@ class Install(ManagerOperation):
                             requirements[i] = None
                 with open(self.requirements_path, 'w') as f:
                     f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
+
+        if manager.vcs_packages:
+            manager.install_vcs_packages()
 
 
 class InstallTest(TestOperation, Install):
