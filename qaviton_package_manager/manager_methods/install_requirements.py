@@ -159,8 +159,10 @@ class PackageManager:
             """Clear the readonly bit and reattempt the removal"""
             os.chmod(path, stat.S_IWRITE)
             func(path)
-        shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
-
+        try:
+            shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
+        except:
+            shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
 
     def __init__(self, packages: [str], parent: str = None):
         self.packages_to_clone: List[Package] = []
