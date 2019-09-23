@@ -37,6 +37,7 @@ def get_package_name_from_requirement(requirement: str):
                 if c not in invalid_package_chars:
                     version = requirement[i:]
                     break
+            break
     return name, version
 
 
