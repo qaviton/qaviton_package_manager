@@ -121,19 +121,23 @@ class Package:
 
 
 class PackageManager:
-    installed = {}
-    vcs_packages: Dict[str, Package] = {}
-    vcs_ord = []
-    pip_packages = []
-    uninstallable_packages = []
+    installed: dict
+    vcs_packages: Dict[str, Package]
+    vcs_ord: list
+    pip_packages: list
+    uninstallable_packages: list
     git: Git
     tmp: str
     _tmp: TemporaryDirectory
-    # satisfied = []
 
     @classmethod
     def init(cls, git: Git, packages: [str]):
-        cls.git = git
+        cls.installed = {}
+        cls.vcs_packages: Dict[str, Package] = {}
+        cls.vcs_ord = []
+        cls.pip_packages = []
+        cls.uninstallable_packages = []
+        cls.git: Git = git
         for i in pip('freeze').decode('utf-8').splitlines():
             cls.installed.__setitem__(*i.split('=='))
         return cls(packages)
