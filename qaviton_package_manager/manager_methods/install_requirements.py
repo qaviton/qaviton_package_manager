@@ -225,7 +225,7 @@ class PackageManager:
                     name, version = b[1].split(':', 1)
                     version = version.split(',')
                 else:
-                    name, version = b[1], []
+                    name, version = b[1], None
 
                 pkg = Package(**{
                     'link': uri,
