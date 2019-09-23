@@ -2,6 +2,7 @@
   <dictionary name="yonad">
     <words>
       <w>pypi</w>
+      <w>uninstallable</w>
       <w>urlencode</w>
       <w>useremail</w>
       <w>versioning</w>
