@@ -160,7 +160,11 @@ class PackageManager:
             shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
         except:
             shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
-
+        try:
+            PackageManager._tmp.cleanup()
+        except:
+            pass
+        
     def __init__(self, packages: [str], parent: str = None):
         self.packages_to_clone: List[Package] = []
         self.parent = parent
