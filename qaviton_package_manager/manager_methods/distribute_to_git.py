@@ -41,8 +41,11 @@ class Build(Prep):
             git.create_branch(to_branch).create_remote()
         elif to_branch != current_branch:
             git.checkout(to_branch)
-            git.pull()
-            git(f'rebase {current_branch}')
+            if git.has_remote():
+                git.pull()
+                git(f'rebase {current_branch}')
+            else:
+                git.create_remote()
 
         git.tag(version, msg)
         git.push(git.url, to_branch)
