@@ -92,11 +92,12 @@ class Package:
 
     def clone(self):
         self.repo = PackageManager.git.clone(
-            path=self.path,
-            url=self.url,
-            username=PackageManager.git.username,
-            password=PackageManager.git.password,
-            email=PackageManager.git.email)
+            self.path,
+            self.url,
+            PackageManager.git.username,
+            PackageManager.git.password,
+            PackageManager.git.email,
+            f'--single-branch --branch "{self.branch}"')
 
     def set_version(self):
         self.versions = sorted(self.repo('tag --merged').decode('utf-8').splitlines())
@@ -147,15 +148,15 @@ class PackageManager:
         # python_code('import shutil', f'shutil.rmtree("{tmp}")')
         # PackageManager._tmp.cleanup()
 
-        def handleRemoveReadonly(func, path, exc):
+        def remove_readonly(func, path, exc):
             excvalue = exc[1]
             if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
-                os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
+                os.chmod(path, stat.S_IWRITE | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
                 func(path)
             else:
                 raise
 
-        shutil.rmtree(PackageManager.tmp, ignore_errors=False, onerror=handleRemoveReadonly)
+        shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
 
 
     def __init__(self, packages: [str], parent: str = None):
