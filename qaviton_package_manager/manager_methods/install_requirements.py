@@ -199,7 +199,8 @@ class PackageManager:
                 for requirements_pkg in requirements_manager.vcs_packages.values():
                     for i, requirement in enumerate(requirements):
                         if requirements_pkg.link == requirement:
-                            requirements[i] = f'{requirements_pkg.name}{"=="+requirements_pkg.version if requirements_pkg.version else ""}'
+                            # requirements[i] = f'{requirements_pkg.name}{"=="+requirements_pkg.version if requirements_pkg.version else ""}'
+                            requirements[i] = ''
                 requirements.append('')
                 with open(pkg.requirements_path, encoding='utf-8', mode='w') as f:
                     f.write('\n'.join(requirements))
