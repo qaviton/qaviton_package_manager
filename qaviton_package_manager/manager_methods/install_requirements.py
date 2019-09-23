@@ -115,9 +115,7 @@ class Package:
                 requirements = f.read().splitlines()
             return requirements
         except FileNotFoundError as e:
-            log.error(e)
-            log.error(f"{self.name} from {self.link} is missing requirements.txt file")
-            raise FileNotFoundError("")
+            raise FileNotFoundError(f"{self.name} from {self.link} is missing requirements.txt file") from e
 
 
 class PackageManager:
