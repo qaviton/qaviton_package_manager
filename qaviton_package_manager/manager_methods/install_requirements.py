@@ -263,6 +263,10 @@ class PackageManager:
                     # print(get_metadata(wheel).requires_dist)
                     break
 
+    def uninstall_vcs_packages(self):
+        packages = [PackageManager.vcs_packages[name].normalized_name for name in reversed(PackageManager.vcs_ord)]
+        pip.uninstall(*packages)
+
 
 class Install(ManagerOperation):
     def run(self):
@@ -273,37 +277,41 @@ class Install(ManagerOperation):
         packages = self.configure_packages()
 
         with PackageManager.init(self.git, packages) as manager:
-            if manager.vcs_packages:
-                manager.clone_packages()
+            try:
+                if manager.vcs_packages:
+                    manager.clone_packages()
 
-            if packages:
-                pip.install(manager.pip_packages)
+                if packages:
+                    pip.install(*manager.pip_packages)
 
-                # TODO: fix this, add check for version evaluation
-                # if not install_requirements and self.packages:
-                #     with open(self.requirements_path) as f:
-                #         packages = f.read().splitlines()
-                #     for i, package in enumerate(packages):
-                #         for added in self.packages:
-                #             if added == package:
-                #                 packages[i] = None
-                #     packages = [pkg for pkg in packages if pkg is not None]
-                #     if packages:
-                #         with open(self.requirements_path, 'a') as f:
-                #             f.write('\n'+'\n'.join(self.packages))
-                if self.packages:
-                    with open(self.requirements_path) as f:
-                        requirements = f.readlines()
-                    for i, line in enumerate(requirements):
-                        requirement = line.replace(' ', '').replace('\n', '')
-                        for package in self.packages:
-                            if package_match(package.replace(' ', ''), requirement):
-                                requirements[i] = None
-                    with open(self.requirements_path, 'w') as f:
-                        f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
+                    # TODO: fix this, add check for version evaluation
+                    # if not install_requirements and self.packages:
+                    #     with open(self.requirements_path) as f:
+                    #         packages = f.read().splitlines()
+                    #     for i, package in enumerate(packages):
+                    #         for added in self.packages:
+                    #             if added == package:
+                    #                 packages[i] = None
+                    #     packages = [pkg for pkg in packages if pkg is not None]
+                    #     if packages:
+                    #         with open(self.requirements_path, 'a') as f:
+                    #             f.write('\n'+'\n'.join(self.packages))
+                    if self.packages:
+                        with open(self.requirements_path) as f:
+                            requirements = f.readlines()
+                        for i, line in enumerate(requirements):
+                            requirement = line.replace(' ', '').replace('\n', '')
+                            for package in self.packages:
+                                if package_match(package.replace(' ', ''), requirement):
+                                    requirements[i] = None
+                        with open(self.requirements_path, 'w') as f:
+                            f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
 
-            if manager.vcs_packages:
+                if manager.vcs_packages:
+                    manager.install_vcs_packages()
+            except Exception as e:
                 manager.install_vcs_packages()
+                raise e
 
 
 class InstallTest(TestOperation, Install):
