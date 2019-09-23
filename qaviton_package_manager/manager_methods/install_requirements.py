@@ -270,6 +270,8 @@ class PackageManager:
 
     def create_wheels(self):
         wheels = []
+        if not pip.exist('wheel'):
+            pip.install('wheel')
         for name in reversed(PackageManager.vcs_ord):
             pkg = PackageManager.vcs_packages[name]
 
