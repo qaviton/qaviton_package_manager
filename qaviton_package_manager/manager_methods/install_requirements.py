@@ -20,7 +20,7 @@ from qaviton_pip import pip
 from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
 from qaviton_package_manager.utils.functions import package_match
 from qaviton_package_manager.utils.logger import log
-from qaviton_processes import run, python_code
+from qaviton_processes import run, python_code, escape
 from sys import executable
 from qaviton_git import Git
 from qaviton_package_manager.exceptions import RepositoryMissMatchError
@@ -144,7 +144,7 @@ class PackageManager:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        python_code('import shutil', f'shutil.rmtree({PackageManager.tmp})')
+        python_code('import shutil', f'shutil.rmtree("{escape(PackageManager.tmp)}")')
         # PackageManager._tmp.cleanup()
 
     def __init__(self, packages: [str], parent: str = None):
