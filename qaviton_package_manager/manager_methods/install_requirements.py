@@ -148,14 +148,17 @@ class PackageManager:
         # python_code('import shutil', f'shutil.rmtree("{tmp}")')
         # PackageManager._tmp.cleanup()
 
-        def remove_readonly(func, path, exc):
-            excvalue = exc[1]
-            if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
-                os.chmod(path, stat.S_IWRITE | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
-                func(path)
-            else:
-                raise
-
+        # def remove_readonly(func, path, exc):
+        #     excvalue = exc[1]
+        #     if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
+        #         os.chmod(path, stat.S_IWRITE | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
+        #         func(path)
+        #     else:
+        #         raise
+        def remove_readonly(func, path, _):
+            """Clear the readonly bit and reattempt the removal"""
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
         shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
 
 
