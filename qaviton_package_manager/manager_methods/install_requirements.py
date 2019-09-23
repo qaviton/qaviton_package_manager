@@ -142,7 +142,8 @@ class PackageManager:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        python_code('import shutil', f'shutil.rmtree("{escape(PackageManager.tmp)}")')
+        tmp = escape(PackageManager.tmp.replace("\\", "\\\\"))
+        python_code('import shutil', f'shutil.rmtree("{tmp}")')
         # PackageManager._tmp.cleanup()
 
     def __init__(self, packages: [str], parent: str = None):
