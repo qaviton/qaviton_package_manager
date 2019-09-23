@@ -177,8 +177,8 @@ class PackageManager:
         for pkg in vcs_packages:
             pkg.set_paths(tmp)
 
-            if pkg.normalized_name in PackageManager.installed:
-                continue
+            # if pkg.normalized_name in PackageManager.installed:
+            #     continue
 
             if exists(pkg.path):
                 continue
