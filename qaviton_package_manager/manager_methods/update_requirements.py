@@ -12,8 +12,8 @@
 # language governing permissions and limitations under the License.
 
 
-from qaviton_pip import pip
 from qaviton_package_manager.manager_methods import ManagerOperation, TestOperation
+from qaviton_package_manager.utils.package_manager import PackageManager
 
 
 class Update(ManagerOperation):
@@ -21,8 +21,11 @@ class Update(ManagerOperation):
         if len(self.packages) == 0 or self.packages[0] is None:
             self.get_packages_from_requirements()
         packages = self.configure_packages()
-        if packages:
-            pip.install(*packages, '--upgrade')
+
+        with PackageManager.init(self.git, packages) as manager:
+            if manager.vcs_packages: manager.clone_packages()
+            if packages:             manager.update_pip_packages()
+            if manager.vcs_packages: manager.update_vcs_packages()
 
 
 class UpdateTest(TestOperation, Update):
