@@ -14,6 +14,7 @@
 from typing import Dict, List
 from os import sep, listdir
 from os.path import exists
+import errno, os, stat, shutil
 # from pkginfo import get_metadata
 from tempfile import TemporaryDirectory
 from qaviton_pip import pip
@@ -142,9 +143,20 @@ class PackageManager:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        tmp = escape(PackageManager.tmp.replace("\\", "\\\\"))
-        python_code('import shutil', f'shutil.rmtree("{tmp}")')
+        # tmp = escape(PackageManager.tmp.replace("\\", "\\\\"))
+        # python_code('import shutil', f'shutil.rmtree("{tmp}")')
         # PackageManager._tmp.cleanup()
+
+        def handleRemoveReadonly(func, path, exc):
+            excvalue = exc[1]
+            if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
+                os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
+                func(path)
+            else:
+                raise
+
+        shutil.rmtree(PackageManager.tmp, ignore_errors=False, onerror=handleRemoveReadonly)
+
 
     def __init__(self, packages: [str], parent: str = None):
         self.packages_to_clone: List[Package] = []
