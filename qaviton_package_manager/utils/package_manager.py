@@ -100,13 +100,16 @@ class Package:
         self.versions = sorted(self.repo('tag --merged').decode('utf-8').splitlines())
 
         # get version
-        if self.version:
-            # TODO: filter out the highest version
-            # version =
-            # repo(f'checkout tags/{version}')
-            self.version = self.versions[-1]
-        else:
-            self.version = self.versions[-1]
+        try:
+            if self.version:
+                # TODO: filter out the highest version
+                # version =
+                # repo(f'checkout tags/{version}')
+                self.version = self.versions[-1]
+            else:
+                self.version = self.versions[-1]
+        except IndexError:
+            pass
 
     def get_requirements(self):
         try:
