@@ -259,7 +259,7 @@ class PackageManager:
                     PackageManager.uninstallable_packages.append(pkg.normalized_name)
                 PackageManager.vcs_packages[name] = pkg
                 PackageManager.vcs_ord.append(name)
-                self.packages_to_clone.append(pkg)
+            self.packages_to_clone.append(pkg)
 
         elif uri not in PackageManager.pip_packages:
             name, version = get_package_name_from_requirement(uri)
