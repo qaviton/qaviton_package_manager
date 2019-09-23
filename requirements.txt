@@ -5,6 +5,6 @@ cryptography>=2.7
 setuptools>=38.6.0
 qaviton-helpers>=2019.9.18.15.45.51.685264
 qaviton-processes>=2019.9.4.12.58.22.283354
-qaviton-pip>=2019.9.4.13.26.8.164891
+qaviton-pip>=2019.9.23.3.13.21.799826
 qaviton-git>=2019.9.22.18.34.32.834284
 pkginfo>=1.5.0.1

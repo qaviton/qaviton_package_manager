@@ -26,7 +26,7 @@ from qaviton_git import Git
 from qaviton_package_manager.exceptions import RepositoryMissMatchError
 
 
-invalid_package_chars = '=,!~<>'
+invalid_package_chars = '=,!~<> '
 def get_package_name_from_requirement(requirement: str):
     version = None
     for i, c in enumerate(requirement):
@@ -52,7 +52,7 @@ class Package:
         self.vcs: str = None
         self.protocol: str = None
         self.version: str = None
-        self.versions: [str] = None
+        self.versions: [str] = []
         self.name: str = None
         self.normalized_name: str = None
         self.parent: str = None
@@ -123,6 +123,7 @@ class PackageManager:
     vcs_packages: Dict[str, Package] = {}
     vcs_ord = []
     pip_packages = []
+    uninstallable_packages = []
     git: Git
     tmp: str
     _tmp: TemporaryDirectory
@@ -213,11 +214,9 @@ class PackageManager:
                     'vcs': 'git',
                     'protocol': a[1].split(':', 1)[0],
                     'version': version,
-                    'versions': [],
                     'name': name,
                     'normalized_name': normalize_package_name(name),
                     'parent': self.parent,
-                    'path': None,
                     **kwargs,
                 })
             except: raise error
@@ -235,15 +234,22 @@ class PackageManager:
                 PackageManager.vcs_ord.pop(PackageManager.vcs_ord.index(name))
                 PackageManager.vcs_ord.append(name)
 
-            elif pkg.normalized_name not in PackageManager.installed:
+            else:
+                if pkg.normalized_name not in PackageManager.installed:
+                    PackageManager.uninstallable_packages.append(pkg.normalized_name)
                 PackageManager.vcs_packages[name] = pkg
                 PackageManager.vcs_ord.append(name)
                 self.packages_to_clone.append(pkg)
 
         elif uri not in PackageManager.pip_packages:
+            name, version = get_package_name_from_requirement(uri)
+            name = normalize_package_name(name)
+            if name not in PackageManager.installed:
+                PackageManager.uninstallable_packages.append(name)
             PackageManager.pip_packages.append(uri)
 
-    def install_vcs_packages(self):
+    def create_wheels(self):
+        wheels = []
         for name in reversed(PackageManager.vcs_ord):
             pkg = PackageManager.vcs_packages[name]
 
@@ -255,17 +261,29 @@ class PackageManager:
 
             # create wheel
             run('cd', pkg.path, '&&', executable, 'setup.py bdist_wheel --universal')
-            dist = pkg.path + sep + 'dist'
-            for fn in listdir(dist):
+            for fn in listdir(pkg.dist_path):
                 if fn.endswith('.whl'):
-                    wheel = dist + sep + fn
-                    pip.install(wheel)
+                    wheels.append(pkg.dist_path + sep + fn)
                     # print(get_metadata(wheel).requires_dist)
                     break
+        return wheels
 
-    def uninstall_vcs_packages(self):
-        packages = [PackageManager.vcs_packages[name].normalized_name for name in reversed(PackageManager.vcs_ord)]
-        pip.uninstall(*packages)
+    def install_pip_packages(self):
+        pip.install(*PackageManager.pip_packages)
+
+    def install_vcs_packages(self):
+        wheels = self.create_wheels()
+        pip.install(*wheels)
+
+    def update_pip_packages(self):
+        pip.upgrade(*PackageManager.pip_packages)
+
+    def update_vcs_packages(self):
+        wheels = self.create_wheels()
+        pip.upgrade(*wheels)
+
+    def uninstall_packages(self):
+        pip.uninstall(*PackageManager.uninstallable_packages)
 
 
 class Install(ManagerOperation):
@@ -282,7 +300,7 @@ class Install(ManagerOperation):
                     manager.clone_packages()
 
                 if packages:
-                    pip.install(*manager.pip_packages)
+                    manager.install_pip_packages()
 
                     # TODO: fix this, add check for version evaluation
                     # if not install_requirements and self.packages:
@@ -309,8 +327,9 @@ class Install(ManagerOperation):
 
                 if manager.vcs_packages:
                     manager.install_vcs_packages()
+                    
             except Exception as e:
-                manager.install_vcs_packages()
+                manager.uninstall_packages()
                 raise e
 
 
