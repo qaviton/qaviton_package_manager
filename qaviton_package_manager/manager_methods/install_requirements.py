@@ -29,6 +29,7 @@ from qaviton_package_manager.exceptions import RepositoryMissMatchError
 invalid_package_chars = '=,!~<> '
 def get_package_name_from_requirement(requirement: str):
     version = None
+    name = requirement
     for i, c in enumerate(requirement):
         if c in invalid_package_chars:
             name = requirement[:i]
@@ -36,7 +37,7 @@ def get_package_name_from_requirement(requirement: str):
                 if c not in invalid_package_chars:
                     version = requirement[i:]
                     break
-            return name, version
+    return name, version
 
 
 def normalize_package_name(name):
