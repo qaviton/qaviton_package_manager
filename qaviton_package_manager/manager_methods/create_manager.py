@@ -13,6 +13,7 @@
 
 
 import os
+from datetime import datetime
 from qaviton_pip import pip
 from qaviton_processes import escape
 from qaviton_package_manager.conf import LICENSE, README, PACKAGE, GIT_IGNORE
@@ -41,6 +42,7 @@ def select_license():
     r = http.get('https://api.github.com/licenses')
     r.raise_for_status()
     licenses: list = r.json()
+    licenses.append({'key': 'private'})
     while True:
         print("\nSelect a License:")
         for i, l in enumerate(licenses):
@@ -139,10 +141,27 @@ class Create(Prep):
             if not os.path.exists(license):
                 key = select_license()
                 print(f'creating file: {license}')
-                http = HTTP.get()
-                r = http.get(f'https://api.github.com/licenses/{key}')
-                r.raise_for_status()
-                content = r.json()['body']
+                if key != "private":
+                    http = HTTP.get()
+                    r = http.get(f'https://api.github.com/licenses/{key}')
+                    r.raise_for_status()
+                    content = r.json()['body']
+                else:
+                    date = datetime.utcnow()
+                    company_name = input("enter your company name:")
+                    full_name = input("enter legal owner full name:")
+                    email = input("enter legal owner's email:")
+                    if not company_name:
+                        company_name = self.git.username
+                    if not full_name:
+                        full_name = self.git.username
+                    if not email:
+                        email = self.git.email
+                    content = (f"# Copyright (C) {company_name} Systems, Inc - All Rights Reserved"
+                               "# Unauthorized copying of this file\directory & all its contents, "
+                               "# via any medium is strictly prohibited"
+                               "# Proprietary and confidential"
+                               f"# Written by {full_name} <{email}>, {date.strftime('%B')} {date.year}")
                 with open(license, 'w') as f:
                     f.write(content)
                 self.git.add(license)
