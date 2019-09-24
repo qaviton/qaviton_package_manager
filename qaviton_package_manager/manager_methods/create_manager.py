@@ -157,11 +157,11 @@ class Create(Prep):
                         full_name = self.git.username
                     if not email:
                         email = self.git.email
-                    content = (f"# Copyright (C) {company_name} Systems, Inc - All Rights Reserved"
-                               "# Unauthorized copying of this file\directory & all its contents, "
-                               "# via any medium is strictly prohibited"
-                               "# Proprietary and confidential"
-                               f"# Written by {full_name} <{email}>, {date.strftime('%B')} {date.year}")
+                    content = (f"# Copyright (C) {company_name} Systems, Inc - All Rights Reserved\n"
+                               "# Unauthorized copying of this file\directory & all its contents,\n"
+                               "# via any medium is strictly prohibited\n"
+                               "# Proprietary and confidential\n"
+                               f"# Written by {full_name} <{email}>, {date.strftime('%B')} {date.year}\n")
                 with open(license, 'w') as f:
                     f.write(content)
                 self.git.add(license)
