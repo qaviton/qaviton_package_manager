@@ -11,17 +11,21 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from typing import Dict, List
-from os import sep, listdir
+from stat import S_IWRITE
+from shutil import rmtree
 from os.path import exists
-import os, stat, shutil
-# from pkginfo import get_metadata
-from tempfile import TemporaryDirectory
-from qaviton_pip import pip
-from qaviton_processes import run
 from sys import executable
+from qaviton_pip import pip
 from qaviton_git import Git
-from qaviton_package_manager.exceptions import RepositoryMissMatchError
+from typing import Dict, List
+from qaviton_processes import run
+# from pkginfo import get_metadata
+from os import sep, listdir, chmod
+from packaging.version import Version
+from tempfile import TemporaryDirectory
+from packaging.specifiers import SpecifierSet
+from qaviton_package_manager.utils.logger import log
+from qaviton_package_manager.exceptions import RepositoryMissMatchError, VersionFilterError
 from qaviton_package_manager.utils.functions import normalize_package_name, get_package_name_from_requirement
 
 
@@ -35,6 +39,7 @@ class Package:
         self.protocol: str = None
         self.version: str = None
         self.versions: [str] = []
+        self.specifier: SpecifierSet = None
         self.name: str = None
         self.normalized_name: str = None
         self.parent: str = None
@@ -79,19 +84,28 @@ class Package:
             f'--single-branch --branch "{self.branch}"')
 
     def set_version(self):
-        self.versions = sorted(self.repo('tag --merged').decode('utf-8').splitlines())
-
+        self.versions = []
+        bad_version_tags = []
+        for v in sorted(self.repo('tag --merged').decode('utf-8').splitlines()):
+            try:
+                self.versions.append(Version(v))
+            except:
+                bad_version_tags.append(v)
+        if bad_version_tags:
+            log.warning(f"package {self.link} has invalid version tags:")
+            for v in bad_version_tags:
+                print(' ', v)
+            log.info('you can fix this issue using: \n'
+                     '  git push --delete origin tagName\n'
+                     '  git tag -d tagName')
         # get version
-        try:
-            if self.version:
-                # TODO: filter out the highest version
-                # version =
-                # repo(f'checkout tags/{version}')
-                self.version = self.versions[-1]
-            else:
-                self.version = self.versions[-1]
-        except IndexError:
-            pass
+        versions = sorted(self.specifier.filter(self.versions))
+        if not versions:
+            raise VersionFilterError(
+                f"pkg {self.link} with specifiers {self.specifier} "
+                f"has no valid version from its versions list: {self.versions}")
+        self.version = versions[-1]
+        self.repo(f'checkout tags/{self.version.__str__()}')
 
     def get_requirements(self):
         try:
@@ -103,11 +117,11 @@ class Package:
 
 
 class PackageManager:
-    installed: dict
+    installed: Dict[str, str]
     vcs_packages: Dict[str, Package]
-    vcs_ord: list
-    pip_packages: list
-    uninstallable_packages: list
+    vcs_ord: List[str]
+    pip_packages: List[str]
+    uninstallable_packages: List[str]
     git: Git
     tmp: str
     _tmp: TemporaryDirectory
@@ -143,17 +157,17 @@ class PackageManager:
         #         raise
         def remove_readonly(func, path, _):
             """Clear the readonly bit and reattempt the removal"""
-            os.chmod(path, stat.S_IWRITE)
+            chmod(path, S_IWRITE)
             func(path)
         try:
-            shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
+            rmtree(PackageManager.tmp, onerror=remove_readonly)
         except:
-            shutil.rmtree(PackageManager.tmp, onerror=remove_readonly)
+            rmtree(PackageManager.tmp, onerror=remove_readonly)
         try:
             PackageManager._tmp.cleanup()
         except:
             pass
-        
+
     def __init__(self, packages: [str], parent: str = None):
         self.packages_to_clone: List[Package] = []
         self.parent = parent
@@ -205,7 +219,6 @@ class PackageManager:
                 "out of those, we dont support git://git.example.com/MyProject#egg=MyProject\n"
                 "our format is as follows:\n"
                 "git+protocol://git.example.com/MyProject.git@{branch}#egg=MyProject:==version\n"
-                # ':==1.1.1,1.1.2,!1.1.3,1.1.*,!1.1.*,!1.1,>1.1,<1.1,1.1-1.3,>=1.1,<=1.1,!(1.2-1.3)'
                 "we urge you to use https for a secure network transaction.")
             if 'git+' not in uri or '#egg=' not in uri: raise error
             try:
@@ -214,9 +227,10 @@ class PackageManager:
                 c = b[0].split('.git@', 1)
 
                 if ':' in b[1]:
-                    name, version = b[1].split(':', 1)
+                    name, specifier = b[1].split(':', 1)
+                    uri = uri.rsplit(':')[0]
                 else:
-                    name, version = b[1], None
+                    name, specifier = b[1], ''
 
                 pkg = Package(**{
                     'link': uri,
@@ -224,7 +238,7 @@ class PackageManager:
                     'branch': c[1],
                     'vcs': 'git',
                     'protocol': a[1].split(':', 1)[0],
-                    'version': version,
+                    'specifier': SpecifierSet(specifier),
                     'name': name,
                     'normalized_name': normalize_package_name(name),
                     'parent': self.parent,
@@ -234,7 +248,7 @@ class PackageManager:
 
             if name in PackageManager.vcs_packages:
                 pkg2 = PackageManager.vcs_packages[name]
-                if uri != pkg.link:
+                if pkg.link != pkg2.link:
                     tree = pkg.get_dependency_tree()
                     tree2 = pkg2.get_dependency_tree()
                     raise RepositoryMissMatchError(
@@ -242,6 +256,7 @@ class PackageManager:
                         f"{' --> '.join(tree2)}\n"
                         f"{' --> '.join(tree)}\n"
                     )
+                pkg2.specifier = pkg.specifier & pkg2.specifier
                 PackageManager.vcs_ord.pop(PackageManager.vcs_ord.index(name))
                 PackageManager.vcs_ord.append(name)
 
