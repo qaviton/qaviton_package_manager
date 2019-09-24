@@ -9,8 +9,8 @@ if __name__ == "__main__":
 
     manager.run(
         # lambda: manager.build(to_branch='tests/latest')
-        lambda: manager.should_build(from_branch=build_branch, to_branch=release_branch),
-        lambda: manager.update(),
+        # lambda: manager.should_build(from_branch=build_branch, to_branch=release_branch),
+        # lambda: manager.update(),
         # lambda: manager.update_test(),
         # lambda: manager.test(),
         lambda: manager.build(release_branch),
