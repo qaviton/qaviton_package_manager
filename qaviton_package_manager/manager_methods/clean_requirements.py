@@ -21,9 +21,9 @@ class Clean(ManagerOperation):
         if len(self.packages) == 0 or self.packages[0] is None:
             self.get_packages_from_requirements()
 
-        packages = ' '.join(self.configure_packages())
+        packages = self.configure_packages()
         if packages:
-            pip.uninstall(packages)
+            pip.uninstall(*packages)
             return True
 
 

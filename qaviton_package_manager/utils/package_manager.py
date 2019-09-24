@@ -22,25 +22,7 @@ from qaviton_processes import run
 from sys import executable
 from qaviton_git import Git
 from qaviton_package_manager.exceptions import RepositoryMissMatchError
-
-
-invalid_package_chars = '=,!~<> '
-def get_package_name_from_requirement(requirement: str):
-    version = None
-    name = requirement
-    for i, c in enumerate(requirement):
-        if c in invalid_package_chars:
-            name = requirement[:i]
-            for i, c in enumerate(requirement, start=i):
-                if c not in invalid_package_chars:
-                    version = requirement[i:]
-                    break
-            break
-    return name, version
-
-
-def normalize_package_name(name):
-    return name.replace('_', '-').replace('.', '-').lower()
+from qaviton_package_manager.utils.functions import normalize_package_name, get_package_name_from_requirement
 
 
 class Package:

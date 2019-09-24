@@ -35,6 +35,9 @@ cred_protocols = (
     supported_protocols[2],
 )
 
+version_specifiers = '=!~<>'
+invalid_package_chars = ', ' + version_specifiers
+
 ignore_list = [
     '# Byte-compiled / optimized / DLL files',
     '__pycache__/',
@@ -148,4 +151,5 @@ ignore_list = [
     '.qaviton_package_manager_cache',
     '.qaviton_package_manager_cache.errors',
     'test_report.xml',
+    '',
 ]

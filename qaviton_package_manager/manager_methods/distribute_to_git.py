@@ -80,7 +80,8 @@ class Build(Prep):
                     break
 
         with open(self.setup_path, 'wb') as f:
-            lines.append(b'\n')
+            if lines[-1] != b'':
+                lines.append(b'')
             f.write(b'\n'.join(lines))
         return version
 
