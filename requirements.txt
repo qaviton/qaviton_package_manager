@@ -7,4 +7,4 @@ setuptools>=38.6.0
 qaviton-helpers>=2019.9.18.15.45.51.685264
 qaviton-processes>=2019.9.4.12.58.22.283354
 qaviton-pip>=2019.9.23.3.13.21.799826
-qaviton-git>=2019.9.25.20.35.39.461343
+qaviton-git>=2019.9.25.20.50.32.370737
