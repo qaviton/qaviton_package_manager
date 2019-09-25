@@ -48,7 +48,7 @@ class Build(Prep):
                 git.create_remote()
 
         git.tag(version, msg)
-        git.push(git.url, to_branch)
+        git.push(git.url, '--follow-tags', to_branch)
 
         # git.switch(branch).create_remote()
         req = f'git+{git.url}@{to_branch}#egg={self.package_name}:=={version}'
