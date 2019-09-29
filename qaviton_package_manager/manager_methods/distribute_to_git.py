@@ -13,7 +13,7 @@
 
 
 import datetime
-from qaviton_helpers import try_to
+from qaviton_handlers.try_functions import try_to
 from qaviton_processes import escape
 from qaviton_git import Git
 from qaviton_package_manager.manager_methods import Prep

@@ -6,7 +6,7 @@ from uuid import uuid4
 from time import time, sleep
 from multiprocessing.connection import Listener, Client
 from traceback import format_exc
-from qaviton_helpers import try_to
+from qaviton_handlers.try_functions import try_to
 # from qaviton_package_manager.conf import ignore_list
 from qaviton_package_manager.utils.functions import find_free_port
 from qaviton_git.git_wrapper import get_root
