@@ -8,7 +8,7 @@
 -------------------------  
   
 Tired of redundant packaging systems for your software?  
-we can package everything using git tags:
+Package everything using git tags:
 ```
 >qpm --build
          |
@@ -51,7 +51,6 @@ pip install --upgrade qaviton_package_manager
 * automatic builds ✓  
 * secure credentials ✓  
 * cross-platform ✓  
-* nested sub-packages ✓  
 * nested/multiple packages ✗  
 * pip -e installs ✗ (coming soon)  
 * docker build ✗ (but can be used with the run function)  
