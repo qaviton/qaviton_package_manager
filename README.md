@@ -8,24 +8,28 @@
 -------------------------  
   
 Tired of redundant packaging systems for your software?  
-qaviton is here to help!  
-we can package everything into simple  
-  
-git branches:  
+we can package everything using git tags:
 ```
-  |
- dev
-  |
-tests
-  |  
-release/2019.9.1.21.12.2.127916      
-  |
-release/2019.9.2.0.39.13.173494     
-  |
-release/latest
+>qpm --build
+         |
+branch: dev
+         |
+branch: tests
+         |  
+[tag 2019.9.1] 
+         |
+[tag 2019.9.2]
+         |
+branch: release/latest
+
+
+>qpm --install "git+https://url/owner/project.git@release/latest#egg=package:>=2019.9.2"
+  |       |      |   |           |                     |             |              |
+qaviton install vcs+protocol://project_url          @branch   #egg=package      (optional) 
+package method  type                                              directory   pep-440 pep-508
+manager                                                             path     :version_specifier
 ```  
-you can now install this package:  
-```pip install git+https://github.com/owner/package.git@release/latest#egg=package```  
+
   
 ## Installation  
 ```sh  
@@ -46,7 +50,8 @@ pip install --upgrade qaviton_package_manager
 * pypi capabilities ✓  
 * automatic builds ✓  
 * secure credentials ✓  
-* crossplatform ✓  
+* cross-platform ✓  
+* nested sub-packages ✓  
 * nested/multiple packages ✗  
 * pip -e installs ✗ (coming soon)  
 * docker build ✗ (but can be used with the run function)  
