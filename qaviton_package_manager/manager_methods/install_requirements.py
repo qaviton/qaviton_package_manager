@@ -51,9 +51,10 @@ class Install(ManagerOperation):
                             for package in self.packages:
                                 if package_match(package, requirement):
                                     requirements[i] = None
-                        requirements.append('')
+                        requirements = [pkg+'\n' for pkg in requirements if pkg is not None]
+                        for pkg in list({pkg+'\n' for pkg in self.packages}): requirements.append(pkg)
                         with open(self.requirements_path, 'w') as f:
-                            f.writelines([pkg for pkg in requirements if pkg is not None] + list({'\n'+pkg for pkg in self.packages}))
+                            f.writelines(requirements)
 
                 if manager.vcs_packages:
                     manager.install_vcs_packages()
