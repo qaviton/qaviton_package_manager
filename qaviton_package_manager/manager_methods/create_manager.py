@@ -74,27 +74,6 @@ class Create(Prep):
         self.pkg = self.root + os.sep + PACKAGE
         self.run()
 
-    def run(self):
-        log.info("asserting package __init__.py file")
-        init_content = self.get_pkg_init()
-
-        log.info("asserting package LICENSE")
-        license = self.get_license()
-
-        log.info("asserting package README")
-        readme = self.get_readme()
-
-        log.info("asserting package requirements")
-        requirements = self.set_requirements()
-
-        log.info("asserting package testing requirements")
-        self.set_test_requirements()
-
-        package_params = self.handle_package_init(init_content, license)
-        self.create_setup_file(readme, requirements, package_params)
-        self.create_package_file()
-        self.handle_git_ignore()
-
     def set_requirements(self):
         path = get_requirements(self.root)
         if not os.path.exists(path):
@@ -157,11 +136,11 @@ class Create(Prep):
                         full_name = self.git.username
                     if not email:
                         email = self.git.email
-                    content = (f"# Copyright (C) {company_name} Systems, Inc - All Rights Reserved\n"
-                               "# Unauthorized copying of this file\directory & all its contents,\n"
-                               "# via any medium is strictly prohibited\n"
-                               "# Proprietary and confidential\n"
-                               f"# Written by {full_name} <{email}>, {date.strftime('%B')} {date.year}\n")
+                    content = (f"Copyright © {company_name} Systems, Inc - All Rights Reserved\n"
+                               "Unauthorized copying of this file\directory & all its contents,\n"
+                               "via any medium is strictly prohibited\n"
+                               "Proprietary and confidential\n"
+                               f"Written by {full_name} <{email}>, {date.strftime('%B')} {date.year}\n")
                 with open(license, 'w') as f:
                     f.write(content)
                 self.git.add(license)
@@ -304,3 +283,25 @@ if __name__ == "__main__":
             with open(self.git_ignore, 'a') as f:
                 f.write('\n'+'\n'.join([line for line in ignore_list if line not in lines]))
         log.info('added content to .gitignore file')
+
+
+    def run(self):
+        log.info("asserting package __init__.py file")
+        init_content = self.get_pkg_init()
+
+        log.info("asserting package LICENSE")
+        license = self.get_license()
+
+        log.info("asserting package README")
+        readme = self.get_readme()
+
+        log.info("asserting package requirements")
+        requirements = self.set_requirements()
+
+        log.info("asserting package testing requirements")
+        self.set_test_requirements()
+
+        package_params = self.handle_package_init(init_content, license)
+        self.create_setup_file(readme, requirements, package_params)
+        self.create_package_file()
+        self.handle_git_ignore()
