@@ -7,7 +7,12 @@
 ![code size](https://img.shields.io/github/languages/code-size/qaviton/qaviton_package_manager)
 -------------------------  
   
-Tired of redundant packaging systems for your software?  
+Qaviton Package Manager (qpm)  
+is a package management tool integrated with git.  
+to enable management of packages both public & private,  
+from git repositories, in addition to the standard package manager.  
+  
+Replace redundant packaging systems using qpm:  
 Package everything using git tags:
 ```
 >qpm --build
@@ -29,7 +34,9 @@ qaviton install vcs+protocol://project_url          @branch   #egg=package      
 package method  type                                              directory   pep-440 pep-508
 manager                                                             path     :version_specifier
 ```  
-
+  
+![game over](https://github.com/qaviton/qaviton_package_manager/blob/master/images/simply_install.JPG?raw=true)  
+  
   
 ## Installation  
 ```sh  
