@@ -298,20 +298,25 @@ class PackageManager:
 
     @staticmethod
     def install_pip_packages():
-        pip.install(*PackageManager.pip_packages)
+        if PackageManager.pip_packages:
+            pip.install(*PackageManager.pip_packages)
 
     def install_vcs_packages(self):
         wheels = self.create_wheels()
-        pip.install(*wheels)
+        if wheels:
+            pip.install(*wheels)
 
     @staticmethod
     def update_pip_packages():
-        pip.upgrade(*PackageManager.pip_packages)
+        if PackageManager.pip_packages:
+            pip.upgrade(*PackageManager.pip_packages)
 
     def update_vcs_packages(self):
         wheels = self.create_wheels()
-        pip.upgrade(*wheels)
+        if wheels:
+            pip.upgrade(*wheels)
 
     @staticmethod
     def uninstall_packages():
-        pip.uninstall(*PackageManager.uninstallable_packages)
+        if PackageManager.uninstallable_packages:
+            pip.uninstall(*PackageManager.uninstallable_packages)
