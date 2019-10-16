@@ -82,7 +82,7 @@ class Create(Prep):
             path = self.root + os.sep + name
             if not os.path.exists(path):
                 open(path, 'w').close()
-                self.git.add(path)
+                self.git.add('"'+path+'"')
         return path
 
     def set_test_requirements(self):
@@ -96,7 +96,7 @@ class Create(Prep):
             if not os.path.exists(path):
                 with open(path, 'w') as f:
                     f.write('pytest')
-                self.git.add(path)
+                self.git.add('"'+path+'"')
         path = self.root + os.sep + SETTINGS.TESTS_DIR
         if not os.path.exists(path):
             print(f'{SETTINGS.TESTS_DIR} not found\nP.S. you can change the default tests directory with qaviton_package_manager.conf.SETTINGS.TESTS_DIR = "filename"')
@@ -108,7 +108,7 @@ class Create(Prep):
                 os.mkdir(path)
                 init_path = path + os.sep + '__init__.py'
                 open(init_path, 'w').close()
-                self.git.add(init_path)
+                self.git.add('"'+init_path+'"')
 
     def get_license(self):
         license = self.root + os.sep + SETTINGS.LICENSE
@@ -153,7 +153,7 @@ class Create(Prep):
                                f"Written by {full_name} <{email}>, {date.strftime('%B')} {date.year}\n")
                 with open(license, 'w') as f:
                     f.write(content)
-                self.git.add(license)
+                self.git.add('"'+license+'"')
         return {'file': license, 'key': key}
 
     def get_readme(self):
@@ -168,7 +168,7 @@ class Create(Prep):
                 print(f'creating file: {readme}')
                 with open(readme, 'w') as f:
                     f.write(self.package_name.replace('_', ' '))
-                self.git.add(readme)
+                self.git.add('"'+readme+'"')
         return readme
 
     def handle_package_init(self, init_content: bytes, license: dict):
@@ -246,7 +246,7 @@ class Create(Prep):
             ])
             with open(path, 'wb') as f:
                 f.write(content)
-            self.git.add(path)
+            self.git.add('"'+path+'"')
 
     def create_package_file(self):
         if os.path.exists(self.pkg):
@@ -287,7 +287,7 @@ if __name__ == "__main__":
             print('creating .gitignore file')
             with open(self.git_ignore, 'w') as f:
                 f.write('\n'.join(ignore_list))
-            self.git.add(self.git_ignore)
+            self.git.add('"'+self.git_ignore+'"')
         else:
             with open(self.git_ignore) as f:
                 lines = f.read().splitlines()
