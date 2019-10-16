@@ -159,7 +159,7 @@ qpm --username "" --password "" --cache_timeout "-1"
 qpm --test "system" "echo success" --test "python" "-c" "print(\"py success\");"
 ```  
   
-#### CLI short cuts:  
+#### CLI shortcuts:  
 we can call any method and send any parameter to the manager through cli:
 ```bash
 # install cachetools using pip and save the requirement in requirements.txt

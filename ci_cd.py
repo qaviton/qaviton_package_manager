@@ -14,7 +14,7 @@ if __name__ == "__main__":
         # lambda: manager.update_test(),
         # lambda: manager.test(),
         lambda: manager.build(release_branch),
-        lambda: manager.upload(),
+        # lambda: manager.upload(),
         lambda: git.push(),
         lambda: git.switch('master'),
         lambda: git.pull(),
