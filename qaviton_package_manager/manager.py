@@ -25,6 +25,7 @@ from qaviton_package_manager.manager_methods.distribute_to_pypi import Upload
 from qaviton_package_manager.manager_methods.test_package import Test
 from qaviton_package_manager.utils.cache_cred import Cache
 from qaviton_package_manager.exceptions import BuildAbortError
+from qaviton_package_manager.utils.shortcuts import short_cut
 
 
 class Manager:
@@ -98,6 +99,7 @@ class Manager:
         length = len(argv)
         i = 1
         if length > i:
+            i = short_cut(self, argv, i)
             while i < length:
                 arg: str = argv[i]
                 if arg.startswith('--'):
