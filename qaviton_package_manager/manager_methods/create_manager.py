@@ -14,11 +14,9 @@
 
 import os
 from datetime import datetime
-from qaviton_pip import pip
 from qaviton_processes import escape
-from qaviton_package_manager.conf import LICENSE, README, PACKAGE, GIT_IGNORE
+from qaviton_package_manager.conf import SETTINGS
 from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
-from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS, TESTS_DIR
 from qaviton_package_manager.utils.logger import log
 from qaviton_git import Git
 from qaviton_package_manager.manager_methods import Prep
@@ -70,38 +68,41 @@ class Create(Prep):
 
         self.pypi_user = pypi_user
         self.pypi_pass = pypi_pass
-        self.git_ignore = self.root + os.sep + GIT_IGNORE
-        self.pkg = self.root + os.sep + PACKAGE
+        self.git_ignore = self.root + os.sep + SETTINGS.GIT_IGNORE
+        self.pkg = self.root + os.sep + SETTINGS.PACKAGE
         self.run()
 
     def set_requirements(self):
         path = get_requirements(self.root)
         if not os.path.exists(path):
-            print(f'{REQUIREMENTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.REQUIREMENTS = "filename"')
-            name = input(f'select REQUIREMENTS filename({REQUIREMENTS} default):')
-            if not name: name = REQUIREMENTS
+            print(f'{SETTINGS.REQUIREMENTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.SETTINGS.REQUIREMENTS = "filename"')
+            name = input(f'select REQUIREMENTS filename({SETTINGS.REQUIREMENTS} default):')
+            if not name: name = SETTINGS.REQUIREMENTS
+            else: SETTINGS.REQUIREMENTS = name
             path = self.root + os.sep + name
             if not os.path.exists(path):
-                pip.freeze(path)
+                open(path, 'w').close()
                 self.git.add(path)
         return path
 
     def set_test_requirements(self):
         path = get_test_requirements(self.root)
         if not os.path.exists(path):
-            print(f'{REQUIREMENTS_TESTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.REQUIREMENTS_TESTS = "filename"')
-            name = input(f'select REQUIREMENTS_TESTS filename({REQUIREMENTS_TESTS} default):')
-            if not name: name = REQUIREMENTS_TESTS
+            print(f'{SETTINGS.REQUIREMENTS_TESTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.SETTINGS.REQUIREMENTS_TESTS = "filename"')
+            name = input(f'select REQUIREMENTS_TESTS filename({SETTINGS.REQUIREMENTS_TESTS} default):')
+            if not name: name = SETTINGS.REQUIREMENTS_TESTS
+            else: SETTINGS.REQUIREMENTS_TESTS = name
             path = self.root + os.sep + name
             if not os.path.exists(path):
                 with open(path, 'w') as f:
                     f.write('pytest')
                 self.git.add(path)
-        path = self.root + os.sep + TESTS_DIR
+        path = self.root + os.sep + SETTINGS.TESTS_DIR
         if not os.path.exists(path):
-            print(f'{TESTS_DIR} not found\nP.S. you can change the default tests directory with qaviton_package_manager.conf.TESTS_DIR = "filename"')
-            name = input(f'select TESTS_DIR filename({TESTS_DIR} default):')
-            if not name: name = TESTS_DIR
+            print(f'{SETTINGS.TESTS_DIR} not found\nP.S. you can change the default tests directory with qaviton_package_manager.conf.SETTINGS.TESTS_DIR = "filename"')
+            name = input(f'select TESTS_DIR filename({SETTINGS.TESTS_DIR} default):')
+            if not name: name = SETTINGS.TESTS_DIR
+            else: SETTINGS.TESTS_DIR = name
             path = self.root + os.sep + name
             if not os.path.exists(path):
                 os.mkdir(path)
@@ -110,12 +111,13 @@ class Create(Prep):
                 self.git.add(init_path)
 
     def get_license(self):
-        license = self.root + os.sep + LICENSE
+        license = self.root + os.sep + SETTINGS.LICENSE
         key = None
         if not os.path.exists(license):
-            log.warning(f'{LICENSE} not found\nP.S. you can change the default license filename with qaviton_package_manager.conf.LICENSE = "filename"')
-            name = input(f'select LICENSE filename({LICENSE} default):')
-            if not name: name = LICENSE
+            log.warning(f'{SETTINGS.LICENSE} not found\nP.S. you can change the default license filename with qaviton_package_manager.conf.SETTINGS.LICENSE = "filename"')
+            name = input(f'select LICENSE filename({SETTINGS.LICENSE} default):')
+            if not name: name = SETTINGS.LICENSE
+            else: SETTINGS.LICENSE = name
             license = self.root + os.sep + name
             if not os.path.exists(license):
                 key = select_license()
@@ -127,15 +129,23 @@ class Create(Prep):
                     content = r.json()['body']
                 else:
                     date = datetime.utcnow()
-                    company_name = input("enter your company name:")
-                    full_name = input("enter legal owner full name:")
-                    email = input("enter legal owner's email:")
-                    if not company_name:
-                        company_name = self.git.username
-                    if not full_name:
-                        full_name = self.git.username
-                    if not email:
-                        email = self.git.email
+                    if not SETTINGS.COMPANY: SETTINGS.COMPANY = self.git.username
+                    if not SETTINGS.OWNER: SETTINGS.OWNER = self.git.username
+                    if not SETTINGS.EMAIL: SETTINGS.EMAIL = self.git.email
+
+                    company_name = input(f"enter your company name({SETTINGS.COMPANY} default):")
+                    full_name = input(f"enter legal owner full name({SETTINGS.OWNER} default):")
+                    email = input(f"enter legal owner's email({SETTINGS.EMAIL} default):")
+
+                    if not company_name: company_name = SETTINGS.COMPANY
+                    else: SETTINGS.COMPANY = company_name
+
+                    if not full_name: full_name = SETTINGS.OWNER
+                    else: SETTINGS.OWNER = full_name
+
+                    if not email: email = SETTINGS.EMAIL
+                    else: SETTINGS.EMAIL = email
+
                     content = (f"Copyright © {company_name} Systems, Inc - All Rights Reserved\n"
                                "Unauthorized copying of this file\directory & all its contents,\n"
                                "via any medium is strictly prohibited\n"
@@ -147,11 +157,12 @@ class Create(Prep):
         return {'file': license, 'key': key}
 
     def get_readme(self):
-        readme = self.root + os.sep + README
+        readme = self.root + os.sep + SETTINGS.README
         if not os.path.exists(readme):
-            log.warning(f'{README} not found\nP.S. you can change the default readme filename with qaviton_package_manager.conf.README = "filename"')
-            name = input(f'select README filename({README} default):')
-            if not name: name = README
+            log.warning(f'{SETTINGS.README} not found\nP.S. you can change the default readme filename with qaviton_package_manager.conf.SETTINGS.README = "filename"')
+            name = input(f'select README filename({SETTINGS.README} default):')
+            if not name: name = SETTINGS.README
+            else: SETTINGS.README = name
             readme = self.root + os.sep + name
             if not os.path.exists(readme):
                 print(f'creating file: {readme}')
@@ -239,7 +250,7 @@ class Create(Prep):
 
     def create_package_file(self):
         if os.path.exists(self.pkg):
-            raise FileExistsError("package.py already exist and may be used for other functionality")
+            log.warning("package.py already exist and may be used for other functionality")
         else:
             key, token = encrypt(
                 url=self.git.url,
@@ -283,7 +294,6 @@ if __name__ == "__main__":
             with open(self.git_ignore, 'a') as f:
                 f.write('\n'+'\n'.join([line for line in ignore_list if line not in lines]))
         log.info('added content to .gitignore file')
-
 
     def run(self):
         log.info("asserting package __init__.py file")

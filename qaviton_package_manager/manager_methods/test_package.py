@@ -1,4 +1,4 @@
-from qaviton_package_manager.conf import TESTS_DIR
+from qaviton_package_manager.conf import SETTINGS
 from qaviton_processes import run, python, pytest
 
 
@@ -6,7 +6,7 @@ class Test(dict):
     def __call__(self, runner=None, *args):
         if not runner:
             if not args:
-                args = ('--junitxml=test_report.xml', TESTS_DIR)
+                args = ('--junitxml=test_report.xml', SETTINGS.TESTS_DIR)
             return pytest(*args)
         if runner not in self:
             raise ValueError(f'{runner} is not a valid test executable')

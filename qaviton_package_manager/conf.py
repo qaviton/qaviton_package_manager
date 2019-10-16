@@ -10,15 +10,10 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
+from qaviton_package_manager.utils.settings import Settings
 
 
-LICENSE = 'LICENSE'
-README = 'README.md'
-REQUIREMENTS = 'requirements.txt'
-REQUIREMENTS_TESTS = 'requirements-test.txt'
-TESTS_DIR = 'tests'
-GIT_IGNORE = '.gitignore'
-PACKAGE = 'package.py'
+SETTINGS = Settings()
 
 
 # https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support

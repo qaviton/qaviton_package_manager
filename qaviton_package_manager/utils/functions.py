@@ -3,11 +3,11 @@ import shutil
 import socket
 from contextlib import closing
 from qaviton_processes import python
-from qaviton_package_manager.conf import REQUIREMENTS, REQUIREMENTS_TESTS, invalid_package_chars, version_specifiers
+from qaviton_package_manager.conf import SETTINGS, invalid_package_chars, version_specifiers
 
 
-def get_requirements(root): return root + os.sep + REQUIREMENTS
-def get_test_requirements(root): return root + os.sep + REQUIREMENTS_TESTS
+def get_requirements(root): return root + os.sep + SETTINGS.REQUIREMENTS
+def get_test_requirements(root): return root + os.sep + SETTINGS.REQUIREMENTS_TESTS
 def normalize_package_name(name): return name.replace('_', '-').replace('.', '-').lower()
 
 
