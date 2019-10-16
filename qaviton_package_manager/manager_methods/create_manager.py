@@ -14,7 +14,7 @@
 
 import os
 from datetime import datetime
-from qaviton_processes import escape
+from qaviton_processes import escape, python
 from qaviton_package_manager.conf import SETTINGS
 from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
 from qaviton_package_manager.utils.logger import log
@@ -295,6 +295,21 @@ if __name__ == "__main__":
                 f.write('\n'+'\n'.join([line for line in ignore_list if line not in lines]))
         log.info('added content to .gitignore file')
 
+    def handle_venv(self):
+        venv_path = self.git.root+os.sep+'venv'
+        if not os.path.exists(venv_path):
+            log.info('Creating virtual environment.')
+            try:
+                import venv
+                venv.create(venv_path)
+            except Exception as e:
+                log.exception(e)
+                log.error('Could not create virtual environment. Please make sure python -m venv venv works on your environment')
+            if os.sep == '\\':
+                log.info('to activate your virtual environment: C:\> venv\\Scripts\\activate.bat')
+            else:
+                log.info('to activate your virtual environment: $ . venv/bin/activate')
+            
     def run(self):
         log.info("asserting package __init__.py file")
         init_content = self.get_pkg_init()
@@ -315,3 +330,4 @@ if __name__ == "__main__":
         self.create_setup_file(readme, requirements, package_params)
         self.create_package_file()
         self.handle_git_ignore()
+        self.handle_venv()
