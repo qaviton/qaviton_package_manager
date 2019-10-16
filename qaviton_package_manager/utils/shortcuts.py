@@ -1,4 +1,6 @@
+# short-cuts for the first argument
 shortcuts = {
+    't': 'test',
     'c': 'create',
     'i': 'install',
     'it': 'install_test',
@@ -11,6 +13,9 @@ shortcuts = {
     'b': 'build',
     'up': 'upload',
     'sb': 'should_build',
+
+    # long short-cuts (no --)
+    'test': 'test',
     'create': 'create',
     'install': 'install',
     'install_test': 'install_test',

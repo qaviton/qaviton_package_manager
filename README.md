@@ -35,7 +35,7 @@ package method  type                                              directory   pe
 manager                                                             path     :version_specifier
 ```  
   
-![game over](https://github.com/qaviton/qaviton_package_manager/blob/master/images/simply_install.JPG?raw=true)  
+![simply_install](https://github.com/qaviton/qaviton_package_manager/blob/master/images/simply_install.JPG?raw=true)  
   
   
 ## Installation  
@@ -158,6 +158,36 @@ qpm --username "" --password "" --cache_timeout "-1"
 # using the system & python to execute tests
 qpm --test "system" "echo success" --test "python" "-c" "print(\"py success\");"
 ```  
+  
+#### CLI short cuts:  
+we can call any method and send any parameter to the manager through cli:
+```bash
+# install cachetools using pip and save the requirement in requirements.txt
+qpm i cachetools
+
+# uninstall cachetools using pip and remove the requirement in requirements.txt
+qpm un cachetools
+
+# build a stable version
+qpm b "stable/latest"
+
+# run tests
+qpm t
+
+# upload to pypi
+qpm up
+
+# install cachetools using pip and save the requirement in requirements.txt
+qpm install cachetools
+
+# build package
+qpm build "stable/latest"
+
+# upload to pypi
+qpm upload
+```  
+![shortcuts_api](https://github.com/qaviton/qaviton_package_manager/blob/master/images/shortcuts_api.JPG?raw=true)  
+  
   
 #### Script:  
 ```python
