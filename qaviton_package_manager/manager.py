@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from sys import argv
+from sys import argv, stderr
 from traceback import format_exc
 from qaviton_git import Git
 from qaviton_package_manager.manager_methods.create_manager import Create
@@ -136,8 +136,22 @@ class Manager:
         self._set_kwargs(kwargs)
         self._ord.extend(kwargs.keys())
         if not self._ord:
+            if not functions:
+                # TODO: add help option and show it here
+                stderr(
+                    "expecting arguments but received none:\n"
+                    "Usage:\n"
+                    "  qpm <command> [options]\n"
+                )
             for f in functions: self._run(f)
         else:
+            if not self._ord:
+                # TODO: add help option and show it here
+                stderr(
+                    "expecting arguments but received none:\n"
+                    "Usage:\n"
+                    "  qpm <command> [options]\n"
+                )
             for key in self._ord:
                 if hasattr(self, key):
                     self._run(getattr(self, key), *self.kwargs[key])
