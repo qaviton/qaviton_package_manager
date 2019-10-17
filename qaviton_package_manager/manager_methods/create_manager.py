@@ -214,9 +214,6 @@ class Create(Prep):
 
     def create_setup_file(self, readme, requirements, package_params):
         path = self.setup_path
-        if os.path.exists(path):
-            return log.warning("setup.py already exist")
-
         content = b''.join([
             b'package_name = "' + bytes(self.package_name, 'utf-8') + b'"\n',
             b'\n',
@@ -328,8 +325,11 @@ if __name__ == "__main__":
         log.info("asserting package testing requirements")
         self.set_test_requirements()
 
-        package_params = self.handle_package_init(init_content, license)
-        self.create_setup_file(readme, requirements, package_params)
+        if os.path.exists(self.setup_path):
+            log.warning("setup.py already exist")
+        else:
+            package_params = self.handle_package_init(init_content, license)
+            self.create_setup_file(readme, requirements, package_params)
         self.create_package_file()
         self.handle_git_ignore()
         self.handle_venv()
