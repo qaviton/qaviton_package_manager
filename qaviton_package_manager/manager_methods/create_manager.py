@@ -63,9 +63,6 @@ class Create(Prep):
 
         Prep.__init__(self, git, self.package_name)
 
-        if os.path.exists(self.setup_path):
-            raise FileExistsError("setup.py already exist")
-
         self.pypi_user = pypi_user
         self.pypi_pass = pypi_pass
         self.git_ignore = self.root + os.sep + SETTINGS.GIT_IGNORE
@@ -216,37 +213,42 @@ class Create(Prep):
         return package_params
 
     def create_setup_file(self, readme, requirements, package_params):
-        path = self.root + os.sep + 'setup.py'
-        if not os.path.exists(path):
-            content = b''.join([
-                b'package_name = "' + bytes(self.package_name, 'utf-8') + b'"\n',
-                b'\n',
-                b'\n',
-                b'if __name__ == "__main__":\n',
-                b'    from sys import version_info as v\n',
-                b'    from setuptools import setup, find_packages\n',
-                b'    with open("' + bytes(requirements.rsplit(os.sep, 1)[1], 'utf-8') + b'") as f: requirements = f.read().splitlines()\n',
-                b'    with open("' + bytes(readme.rsplit(os.sep, 1)[1], 'utf-8') + b'", encoding="utf8") as f: long_description = f.read()\n',
-                b'    setup(\n',
-                b'        name=package_name,\n',
-                b'        version=' + package_params['version'] + b',\n',
-                b'        author=' + package_params['author'] + b',\n',
-                b'        author_email=' + package_params['email'] + b',\n',
-                b'        description=' + package_params['description'] + b',\n',
-                b'        long_description=long_description,\n',
-                b'        long_description_content_type="text/markdown",\n',
-                b'        url=' + package_params['url'] + b',\n',
-                b'        packages=[pkg for pkg in find_packages() if pkg.startswith(package_name)],\n',
-                b'        license=' + package_params['license'] + b',\n',
-                b'        classifiers=[\n',
-                b'            f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
-                b'        ],\n',
-                b'        install_requires=requirements\n',
-                b'    )\n',
-            ])
-            with open(path, 'wb') as f:
-                f.write(content)
-            self.git.add('"'+path+'"')
+        path = self.setup_path
+        if os.path.exists(path):
+            return log.warning("setup.py already exist")
+
+        content = b''.join([
+            b'package_name = "' + bytes(self.package_name, 'utf-8') + b'"\n',
+            b'\n',
+            b'\n',
+            b'if __name__ == "__main__":\n',
+            b'    from sys import version_info as v\n',
+            b'    from setuptools import setup, find_packages\n',
+            b'    with open("' + bytes(requirements.rsplit(os.sep, 1)[1],
+                                       'utf-8') + b'") as f: requirements = f.read().splitlines()\n',
+            b'    with open("' + bytes(readme.rsplit(os.sep, 1)[1],
+                                       'utf-8') + b'", encoding="utf8") as f: long_description = f.read()\n',
+            b'    setup(\n',
+            b'        name=package_name,\n',
+            b'        version=' + package_params['version'] + b',\n',
+            b'        author=' + package_params['author'] + b',\n',
+            b'        author_email=' + package_params['email'] + b',\n',
+            b'        description=' + package_params['description'] + b',\n',
+            b'        long_description=long_description,\n',
+            b'        long_description_content_type="text/markdown",\n',
+            b'        url=' + package_params['url'] + b',\n',
+            b'        packages=[pkg for pkg in find_packages() if pkg.startswith(package_name)],\n',
+            b'        license=' + package_params['license'] + b',\n',
+            b'        classifiers=[\n',
+            b'            f"Programming Language :: Python :: {v[0]}.{v[1]}",\n',
+            b'        ],\n',
+            b'        install_requires=requirements\n',
+            b'    )\n',
+        ])
+        with open(path, 'wb') as f:
+            f.write(content)
+        self.git.add('"' + path + '"')
+
 
     def create_package_file(self):
         if os.path.exists(self.pkg):
