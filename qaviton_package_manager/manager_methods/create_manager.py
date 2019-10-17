@@ -14,7 +14,7 @@
 
 import os
 from datetime import datetime
-from qaviton_processes import escape, python
+from qaviton_processes import escape
 from qaviton_package_manager.conf import SETTINGS
 from qaviton_package_manager.utils.functions import get_requirements, get_test_requirements
 from qaviton_package_manager.utils.logger import log
@@ -34,6 +34,13 @@ class HTTP:
         return HTTP._session
 
 
+def prompt(*args, **kwargs):
+    keys = input(*args, **kwargs)
+    if keys == 'q':
+        raise KeyboardInterrupt("q was pressed. aborting")
+    return keys
+
+
 def select_license():
     log.info('fetching licenses')
     http = HTTP.get()
@@ -46,7 +53,7 @@ def select_license():
         for i, l in enumerate(licenses):
             print(f"  ({i + 1}) {l['key']}")
         try:
-            return licenses[int(input("")) - 1]['key']
+            return licenses[int(prompt("")) - 1]['key']
         except:
             print('invalid input, please select a valid number')
 
@@ -54,6 +61,7 @@ def select_license():
 class Create(Prep):
     def __init__(self, git: Git, pypi_user, pypi_pass, package_name=None):
         log.info("creating git packaging system")
+        log.info("press q to quit")
 
         if package_name is None:
             self.package_name = git.root.rsplit(os.sep, 1)[1]
@@ -73,7 +81,7 @@ class Create(Prep):
         path = get_requirements(self.root)
         if not os.path.exists(path):
             print(f'{SETTINGS.REQUIREMENTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.SETTINGS.REQUIREMENTS = "filename"')
-            name = input(f'select REQUIREMENTS filename({SETTINGS.REQUIREMENTS} default):')
+            name = prompt(f'select REQUIREMENTS filename({SETTINGS.REQUIREMENTS} default):')
             if not name: name = SETTINGS.REQUIREMENTS
             else: SETTINGS.REQUIREMENTS = name
             path = self.root + os.sep + name
@@ -86,7 +94,7 @@ class Create(Prep):
         path = get_test_requirements(self.root)
         if not os.path.exists(path):
             print(f'{SETTINGS.REQUIREMENTS_TESTS} not found\nP.S. you can change the default requirements filename with qaviton_package_manager.conf.SETTINGS.REQUIREMENTS_TESTS = "filename"')
-            name = input(f'select REQUIREMENTS_TESTS filename({SETTINGS.REQUIREMENTS_TESTS} default):')
+            name = prompt(f'select REQUIREMENTS_TESTS filename({SETTINGS.REQUIREMENTS_TESTS} default):')
             if not name: name = SETTINGS.REQUIREMENTS_TESTS
             else: SETTINGS.REQUIREMENTS_TESTS = name
             path = self.root + os.sep + name
@@ -97,7 +105,7 @@ class Create(Prep):
         path = self.root + os.sep + SETTINGS.TESTS_DIR
         if not os.path.exists(path):
             print(f'{SETTINGS.TESTS_DIR} not found\nP.S. you can change the default tests directory with qaviton_package_manager.conf.SETTINGS.TESTS_DIR = "filename"')
-            name = input(f'select TESTS_DIR filename({SETTINGS.TESTS_DIR} default):')
+            name = prompt(f'select TESTS_DIR filename({SETTINGS.TESTS_DIR} default):')
             if not name: name = SETTINGS.TESTS_DIR
             else: SETTINGS.TESTS_DIR = name
             path = self.root + os.sep + name
@@ -112,7 +120,7 @@ class Create(Prep):
         key = None
         if not os.path.exists(license):
             log.warning(f'{SETTINGS.LICENSE} not found\nP.S. you can change the default license filename with qaviton_package_manager.conf.SETTINGS.LICENSE = "filename"')
-            name = input(f'select LICENSE filename({SETTINGS.LICENSE} default):')
+            name = prompt(f'select LICENSE filename({SETTINGS.LICENSE} default):')
             if not name: name = SETTINGS.LICENSE
             else: SETTINGS.LICENSE = name
             license = self.root + os.sep + name
@@ -130,9 +138,9 @@ class Create(Prep):
                     if not SETTINGS.OWNER: SETTINGS.OWNER = self.git.username
                     if not SETTINGS.EMAIL: SETTINGS.EMAIL = self.git.email
 
-                    company_name = input(f"enter your company name({SETTINGS.COMPANY} default):")
-                    full_name = input(f"enter legal owner full name({SETTINGS.OWNER} default):")
-                    email = input(f"enter legal owner's email({SETTINGS.EMAIL} default):")
+                    company_name = prompt(f"enter your company name({SETTINGS.COMPANY} default):")
+                    full_name = prompt(f"enter legal owner full name({SETTINGS.OWNER} default):")
+                    email = prompt(f"enter legal owner's email({SETTINGS.EMAIL} default):")
 
                     if not company_name: company_name = SETTINGS.COMPANY
                     else: SETTINGS.COMPANY = company_name
@@ -157,7 +165,7 @@ class Create(Prep):
         readme = self.root + os.sep + SETTINGS.README
         if not os.path.exists(readme):
             log.warning(f'{SETTINGS.README} not found\nP.S. you can change the default readme filename with qaviton_package_manager.conf.SETTINGS.README = "filename"')
-            name = input(f'select README filename({SETTINGS.README} default):')
+            name = prompt(f'select README filename({SETTINGS.README} default):')
             if not name: name = SETTINGS.README
             else: SETTINGS.README = name
             readme = self.root + os.sep + name
