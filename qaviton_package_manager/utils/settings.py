@@ -84,7 +84,7 @@ class Settings:
                 self._EMAIL = data["EMAIL"]
                 self._LICENSE_TYPE = data["LICENSE_TYPE"]
                 break
-            except AttributeError:
+            except (AttributeError, KeyError):
                 self._set_default()
                 update = True
         if update:
