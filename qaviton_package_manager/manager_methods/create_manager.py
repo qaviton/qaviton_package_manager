@@ -57,7 +57,7 @@ def select_license():
                 default_no = i
         if default_no is None:
             SETTINGS.LICENSE_TYPE = licenses[-1]['key']
-            default_no = len(licenses)
+            default_no = len(licenses) + 1
         print(f"default: ({default_no}) {SETTINGS.LICENSE_TYPE}")
         try:
             license_no = prompt("")
