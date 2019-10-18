@@ -54,7 +54,7 @@ def select_license():
         for i, l in enumerate(licenses):
             print(f"  ({i + 1}) {l['key']}")
             if l['key'] == SETTINGS.LICENSE_TYPE:
-                default_no = i
+                default_no = i + 1
         if default_no is None:
             SETTINGS.LICENSE_TYPE = licenses[-1]['key']
             default_no = len(licenses) + 1
