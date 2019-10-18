@@ -18,23 +18,38 @@ import json
 class Settings:
     def __init__(self):
         self._settings = dirname(__file__) + sep + 'settings.json'
-        if not exists(self._settings):
-            self._LICENSE = 'LICENSE'
-            self._README = 'README.md'
-            self._REQUIREMENTS = 'requirements.txt'
-            self._REQUIREMENTS_TESTS = 'requirements-test.txt'
-            self._TESTS_DIR = 'tests'
-            self._GIT_IGNORE = '.gitignore'
-            self._PACKAGE = 'package.py'
-            self._COMPANY = ''
-            self._OWNER = ''
-            self._EMAIL = ''
-            self._LICENSE_TYPE = 'private'
-            self.save()
-        else:
-            self.load()
+        self._LICENSE = None
+        self._README = None
+        self._REQUIREMENTS = None
+        self._REQUIREMENTS_TESTS = None
+        self._TESTS_DIR = None
+        self._GIT_IGNORE = None
+        self._PACKAGE = None
+        self._COMPANY = None
+        self._OWNER = None
+        self._EMAIL = None
+        self._LICENSE_TYPE = None
 
-    def save(self):
+        if not exists(self._settings):
+            self._set_default()
+            self._save()
+        else:
+            self._load()
+
+    def _set_default(self):
+        if self._LICENSE is None: self._LICENSE = 'LICENSE'
+        if self._README is None: self._README = 'README.md'
+        if self._REQUIREMENTS is None: self._REQUIREMENTS = 'requirements.txt'
+        if self._REQUIREMENTS_TESTS is None: self._REQUIREMENTS_TESTS = 'requirements-test.txt'
+        if self._TESTS_DIR is None: self._TESTS_DIR = 'tests'
+        if self._GIT_IGNORE is None: self._GIT_IGNORE = '.gitignore'
+        if self._PACKAGE is None: self._PACKAGE = 'package.py'
+        if self._COMPANY is None: self._COMPANY = ''
+        if self._OWNER is None: self._OWNER = ''
+        if self._EMAIL is None: self._EMAIL = ''
+        if self._LICENSE_TYPE is None: self._LICENSE_TYPE = 'private'
+
+    def _save(self):
         with open(self._settings, 'w') as f:
             json.dump({
                 "LICENSE": self._LICENSE,
@@ -50,20 +65,30 @@ class Settings:
                 "LICENSE_TYPE": self._LICENSE_TYPE,
             }, f)
 
-    def load(self):
+    def _load(self):
         with open(self._settings) as f:
             data = json.load(f)
-        self._LICENSE = data["LICENSE"]
-        self._README = data["README"]
-        self._REQUIREMENTS = data["REQUIREMENTS"]
-        self._REQUIREMENTS_TESTS = data["REQUIREMENTS_TESTS"]
-        self._TESTS_DIR = data["TESTS_DIR"]
-        self._GIT_IGNORE = data["GIT_IGNORE"]
-        self._PACKAGE = data["PACKAGE"]
-        self._COMPANY = data["COMPANY"]
-        self._OWNER = data["OWNER"]
-        self._EMAIL = data["EMAIL"]
-        self._LICENSE_TYPE = data["LICENSE_TYPE"]
+
+        update = False
+        while True:
+            try:
+                self._LICENSE = data["LICENSE"]
+                self._README = data["README"]
+                self._REQUIREMENTS = data["REQUIREMENTS"]
+                self._REQUIREMENTS_TESTS = data["REQUIREMENTS_TESTS"]
+                self._TESTS_DIR = data["TESTS_DIR"]
+                self._GIT_IGNORE = data["GIT_IGNORE"]
+                self._PACKAGE = data["PACKAGE"]
+                self._COMPANY = data["COMPANY"]
+                self._OWNER = data["OWNER"]
+                self._EMAIL = data["EMAIL"]
+                self._LICENSE_TYPE = data["LICENSE_TYPE"]
+                break
+            except AttributeError:
+                self._set_default()
+                update = True
+        if update:
+            self._save()
 
     @property
     def LICENSE(self):
@@ -112,54 +137,54 @@ class Settings:
     @LICENSE.setter
     def LICENSE(self, value):
         self._LICENSE = value
-        self.save()
+        self._save()
 
     @README.setter
     def README(self, value):
         self._README = value
-        self.save()
+        self._save()
 
     @REQUIREMENTS.setter
     def REQUIREMENTS(self, value):
         self._REQUIREMENTS = value
-        self.save()
+        self._save()
 
     @REQUIREMENTS_TESTS.setter
     def REQUIREMENTS_TESTS(self, value):
         self._REQUIREMENTS_TESTS = value
-        self.save()
+        self._save()
 
     @TESTS_DIR.setter
     def TESTS_DIR(self, value):
         self._TESTS_DIR = value
-        self.save()
+        self._save()
 
     @GIT_IGNORE.setter
     def GIT_IGNORE(self, value):
         self._GIT_IGNORE = value
-        self.save()
+        self._save()
 
     @PACKAGE.setter
     def PACKAGE(self, value):
         self._PACKAGE = value
-        self.save()
+        self._save()
 
     @COMPANY.setter
     def COMPANY(self, value):
         self._COMPANY = value
-        self.save()
+        self._save()
 
     @OWNER.setter
     def OWNER(self, value):
         self._OWNER = value
-        self.save()
+        self._save()
 
     @EMAIL.setter
     def EMAIL(self, value):
         self._EMAIL = value
-        self.save()
+        self._save()
 
     @LICENSE_TYPE.setter
     def LICENSE_TYPE(self, value):
         self._LICENSE_TYPE = value
-        self.save()
+        self._save()
