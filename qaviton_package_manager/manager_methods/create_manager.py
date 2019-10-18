@@ -50,10 +50,20 @@ def select_license():
     licenses.append({'key': 'private'})
     while True:
         print("\nSelect a License:")
+        default_no = None
         for i, l in enumerate(licenses):
             print(f"  ({i + 1}) {l['key']}")
+            if l['key'] == SETTINGS.LICENSE_TYPE:
+                default_no = i
+        if default_no is None:
+            SETTINGS.LICENSE_TYPE = licenses[-1]['key']
+            default_no = len(licenses)
+        print(f"default: ({default_no}) {SETTINGS.LICENSE_TYPE}")
         try:
-            return licenses[int(prompt("")) - 1]['key']
+            license_no = prompt("")
+            if not license_no:
+                return SETTINGS.LICENSE_TYPE
+            return licenses[int(license_no) - 1]['key']
         except:
             print('invalid input, please select a valid number')
 

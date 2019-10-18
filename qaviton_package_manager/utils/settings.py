@@ -29,6 +29,7 @@ class Settings:
             self._COMPANY = ''
             self._OWNER = ''
             self._EMAIL = ''
+            self._LICENSE_TYPE = 'private'
             self.save()
         else:
             self.load()
@@ -46,6 +47,7 @@ class Settings:
                 "COMPANY": self._COMPANY,
                 "OWNER": self._OWNER,
                 "EMAIL": self._EMAIL,
+                "LICENSE_TYPE": self._LICENSE_TYPE,
             }, f)
 
     def load(self):
@@ -58,6 +60,10 @@ class Settings:
         self._TESTS_DIR = data["TESTS_DIR"]
         self._GIT_IGNORE = data["GIT_IGNORE"]
         self._PACKAGE = data["PACKAGE"]
+        self._COMPANY = data["COMPANY"]
+        self._OWNER = data["OWNER"]
+        self._EMAIL = data["EMAIL"]
+        self._LICENSE_TYPE = data["LICENSE_TYPE"]
 
     @property
     def LICENSE(self):
@@ -98,6 +104,10 @@ class Settings:
     @property
     def EMAIL(self):
         return self._EMAIL
+
+    @property
+    def LICENSE_TYPE(self):
+        return self._LICENSE_TYPE
 
     @LICENSE.setter
     def LICENSE(self, value):
@@ -147,4 +157,9 @@ class Settings:
     @EMAIL.setter
     def EMAIL(self, value):
         self._EMAIL = value
+        self.save()
+
+    @LICENSE_TYPE.setter
+    def LICENSE_TYPE(self, value):
+        self._LICENSE_TYPE = value
         self.save()
