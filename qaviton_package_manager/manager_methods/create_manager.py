@@ -64,6 +64,8 @@ def select_license():
             if not license_no:
                 return SETTINGS.LICENSE_TYPE
             return licenses[int(license_no) - 1]['key']
+        except KeyboardInterrupt as e:
+            raise e
         except:
             print('invalid input, please select a valid number')
 
